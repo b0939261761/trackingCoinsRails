@@ -1,0 +1,11 @@
+AllCops:
+  TargetRubyVersion: 2.4.3
+
+Style/EndOfLine:
+  EnforcedStyle: lf
+
+Metrics/MethodLength:
+  Max: 30
+
+Metrics/ModuleLength:
+  Max: 200

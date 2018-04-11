@@ -3,7 +3,7 @@ git_source(:github) { |repo| "https://github.com/#{repo}.git" }
 
 ruby '2.5.1'
 
-gem 'bcrypt', git: 'git@github.com:codahale/bcrypt-ruby.git'
+gem 'bcrypt'
 gem 'rack-cors'
 gem 'jwt'
 gem 'rails', '~> 5.2.0'

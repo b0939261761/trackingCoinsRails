@@ -4,6 +4,7 @@
 class ApiController < ApplicationController
   include Auth
   include Token
+  include Notifications
 
   private
 

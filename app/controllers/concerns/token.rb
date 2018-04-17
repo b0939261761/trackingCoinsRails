@@ -2,7 +2,7 @@
 
 # Generate token
 module Token
-  ACCESS_PERIOD = 900
+  ACCESS_PERIOD = 9000
   POST_PERIOD = 8_000
 
   def access_token(user_id:)

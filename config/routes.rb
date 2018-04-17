@@ -15,4 +15,10 @@ Rails.application.routes.draw do
   post :take_access_token, controller: :api
   post :user_update, controller: :api
   post :user_info, controller: :api
+
+  post :edit_notification, controller: :api
+  post :remove_notification, controller: :api
+  post :get_exchanges, controller: :api
+  post :get_pairs, controller: :api
+  post :get_notifications, controller: :api
 end

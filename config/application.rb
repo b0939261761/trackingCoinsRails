@@ -24,5 +24,7 @@ module TrackingCoinsRails
     config.api_only = true
 
     Dotenv::Railtie.load
+
+    config.active_job.queue_adapter = :sidekiq
   end
 end

@@ -32,10 +32,10 @@ module SendgridMailer
       MAIL_HEADER
     )
 
-    if response.code != '202'
-      { status: false, error: response }
+    if response.code == '202'
+      false
     else
-      { status: true }
+      response
     end
   end
 

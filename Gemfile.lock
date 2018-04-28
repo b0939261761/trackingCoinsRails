@@ -1,9 +1,3 @@
-GIT
-  remote: https://github.com/codahale/bcrypt-ruby.git
-  revision: f2db689ba567d1a018f4dacb1ccf909adc93e887
-  specs:
-    bcrypt (3.1.11)
-
 GEM
   remote: https://rubygems.org/
   specs:
@@ -49,12 +43,15 @@ GEM
       minitest (~> 5.1)
       tzinfo (~> 1.1)
     arel (9.0.0)
+    bcrypt (3.1.11)
+    bcrypt (3.1.11-x64-mingw32)
     bootsnap (1.3.0)
       msgpack (~> 1.0)
     builder (3.2.3)
     byebug (10.0.2)
     chronic (0.10.2)
     concurrent-ruby (1.0.5)
+    connection_pool (2.2.1)
     crass (1.0.4)
     dotenv (2.2.2)
     dotenv-rails (2.2.2)
@@ -78,14 +75,22 @@ GEM
     mini_mime (1.0.0)
     mini_portile2 (2.3.0)
     minitest (5.11.3)
+    msgpack (1.2.4)
     msgpack (1.2.4-x64-mingw32)
     nio4r (2.3.0)
+    nokogiri (1.8.2)
+      mini_portile2 (~> 2.3.0)
     nokogiri (1.8.2-x64-mingw32)
       mini_portile2 (~> 2.3.0)
+    passenger (5.2.3)
+      rack
+      rake (>= 0.8.1)
+    pg (1.0.0)
     pg (1.0.0-x64-mingw32)
-    puma (3.11.4)
     rack (2.0.4)
     rack-cors (1.0.2)
+    rack-protection (2.0.1)
+      rack
     rack-test (1.0.0)
       rack (>= 1.0, < 3)
     rails (5.2.0)
@@ -113,6 +118,12 @@ GEM
       rake (>= 0.8.7)
       thor (>= 0.18.1, < 2.0)
     rake (12.3.1)
+    redis (4.0.1)
+    sidekiq (5.1.3)
+      concurrent-ruby (~> 1.0)
+      connection_pool (~> 2.2, >= 2.2.0)
+      rack-protection (>= 1.5.0)
+      redis (>= 3.3.5, < 5)
     sprockets (3.7.1)
       concurrent-ruby (~> 1.0)
       rack (> 1, < 3)
@@ -133,18 +144,20 @@ GEM
       chronic (>= 0.6.3)
 
 PLATFORMS
+  ruby
   x64-mingw32
 
 DEPENDENCIES
-  bcrypt!
+  bcrypt
   bootsnap
   byebug
   dotenv-rails
   jwt
+  passenger
   pg
-  puma
   rack-cors
   rails (~> 5.2.0)
+  sidekiq
   tzinfo-data
   whenever
 

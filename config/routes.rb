@@ -1,8 +1,12 @@
 # frozen_string_literal: true
 
 Rails.application.routes.draw do
-  post :sing_up, controller: :api
-  post :sing_in, controller: :api
+  require 'sidekiq/web'
+  mount Sidekiq::Web => '/sidekiq'
+
+  post :jobs, controller: :api
+  post :sign_up, controller: :api
+  post :sign_in, controller: :api
 
   post :check_user, controller: :api
   post :repeat_confirmation, controller: :api
@@ -15,6 +19,7 @@ Rails.application.routes.draw do
   post :take_access_token, controller: :api
   post :user_update, controller: :api
   post :user_info, controller: :api
+  post :user_remove, controller: :api
 
   post :edit_notification, controller: :api
   post :remove_notification, controller: :api

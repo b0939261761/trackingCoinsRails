@@ -4,150 +4,152 @@
 module Auth
   include SendgridMailer
 
-  EMAIL_EXISTS = 4061
-  EMAIL_NOT_EXISTS = 4062
-
   def check_user
-    render json: { status: !get_user_by_email(email: params[:email]).nil? }
+    render json: { check: !get_user_by_email(email: params[:email]).nil? }
   end
 
-  def sing_in
-    render json:
-      if (user = get_user_by_email(email: params[:email])) &&
-         user.authenticate(params[:password]) &&
-         user.confirmed
+  def sign_in
+    data = 200, { }
 
-        header_tokens(user: user)
-        { status: true, user: user_for_api(user: user) }
-      else
-        { status: false }
-      end
+    if (user = get_user_by_email(email: params[:email])) &&
+        user.authenticate(params[:password]) &&
+        user.confirmed
+
+      header_tokens(user: user)
+      data = { user: user_for_api(user: user) }
+    else
+      status, data = 403, { error: 'FAIL_AUTH' }
+    end
+
+    render json: data, status: status
   end
 
-  def sing_up
+  def sign_up
     email = params[:email]
-    render json:
-      if get_user_by_email(email: email)
-        { status: false, error: EMAIL_EXISTS }
-      else
-        par = params.permit(:username, :email, :password).merge(lang: current_lang)
-        user = User.create(par)
-        send_confirmation(user_id: user.id, email: email, lang: current_lang)
+    status, data = 200, { }
+
+    if get_user_by_email(email: email)
+      status = 400, { error: 'FAIL_EMAIL_EXISTS' }
+    else
+      par = params.permit(:username, :email, :password).merge(lang: current_lang)
+      user = User.create(par)
+      if send_confirmation(user_id: user.id, email: email, lang: current_lang)
+        user.destroy
+        status, data = 400, { error: 'FAIL_SEND' }
       end
+    end
+
+    render json: data, status: status
   end
 
   def repeat_confirmation
     email = params[:email]
-    render json:
-      if (user = get_user_by_email(email: email)) && !user.confirmed
-        send_confirmation(user_id: user.id, email: email, lang: current_lang)
-      else
-        { status: false, error: EMAIL_NOT_EXISTS }
+    status, data = 200, { }
+
+    if (user = get_user_by_email(email: email)) && !user.confirmed
+      if send_confirmation(user_id: user.id, email: email, lang: current_lang)
+        status, data = 400, { error: 'FAIL_SEND' }
       end
+    else
+      status, data = 400, { error: 'FAIL_EMAIL_NOT_EXISTS' }
+    end
+
+    render json: data, status: status
   end
 
   def confirm_registration
     token = decode_token(bearer_token)
+    status, data = 200, { }
 
-    render json:
-      if token && token['type'] == 'registration'
-        user = get_user_by_id(id: token['user'])
-        user.update(confirmed: true)
+    if token && token['type'] == 'registration'
+      user = get_user_by_id(id: token['user'])
+      user.update(confirmed: true)
 
-        header_tokens(user: user)
-        { status: true, user: user_for_api(user: user) }
-      else
-        { status: false }
-      end
+      header_tokens(user: user)
+      data = { user: user_for_api(user: user) }
+    else
+      status, data = 403, { error: 'FAIL_CONFIRM' }
+    end
+
+    render json: data, status: status
   end
 
   def recovery_password
     email = params[:email]
-    render json:
-      if (user = get_user_by_email(email: email))
-        send_recovery(user_id: user.id, email: email, lang: current_lang)
-      else
-        { status: false, error: EMAIL_NOT_EXISTS }
+    status, data = 200, { }
+
+    if (user = get_user_by_email(email: email))
+      if send_recovery(user_id: user.id, email: email, lang: current_lang)
+        status, data = 400, { error: 'FAIL_SEND' }
       end
+    else
+      status, data = 400, { error: 'FAIL_EMAIL_NOT_EXISTS' }
+    end
+
+    render json: data, status: status
   end
 
   def confirm_recovery
     token = decode_token(bearer_token)
+    status, data = 200, { }
 
-    render json:
-      if token && token['type'] == 'recovery'
-        { status: true }
-      else
-        { status: false }
-      end
+    unless token && token['type'] == 'recovery'
+    token = decode_token(bearer_token)
+      status, data = 403, { error: 'FAIL_RECOVERY' }
+    end
+
+    render json: data, status: status
   end
 
   def change_password
     token = decode_token(bearer_token)
+    status, data = 200, { }
 
-    render json:
-      if token && token['type'] == 'recovery'
-        user = get_user_by_id(id: token['user'])
-        user.update(password: params[:password])
+    if token && token['type'] == 'recovery'
+      user = get_user_by_id(id: token['user'])
+      user.update(password: params[:password])
 
-        header_tokens(user: user)
-        { status: true, user: user_for_api(user: user) }
-      else
-        { status: false }
-      end
+      header_tokens(user: user)
+      { user: user_for_api(user: user) }
+    else
+      status, data = 403, { error: 'FAIL_CHANGE_PASSWORD' }
+    end
+
+    render json: data, status: status
   end
 
   def take_access_token
     token_encode = bearer_token
+    status = 200
 
-    render json:
-      if (token = decode_token(token_encode)) && token['type'] == 'refresh'
-        user = get_user_by_id(id: token['user'])
-        if user.refresh_token == token_encode
-          header_tokens(user: user)
-          { status: true }
-        else
-          { status: false }
-        end
+    if (token = decode_token(token_encode)) && token['type'] == 'refresh'
+      user = get_user_by_id(id: token['user'])
+
+      if user.refresh_token == token_encode
+        header_tokens(user: user)
       else
-        { status: false }
+        status = 401
       end
+    else
+      status = 401
+    end
+
+    render json: { }, status: status
   end
 
-  def user_update
-    token_encode = bearer_token
-
-    render json:
-      if (token = decode_token(token_encode)) && token['type'] == 'access'
-        par = params.permit(:username, :email, :password, :lang)
-
-        user = User.update(token['user'], par)
-        { status: true, user: user_for_api(user: user) }
-      else
-        { status: false }
-      end
-  end
-
-  def user_info
-    token_encode = bearer_token
-
-    render json:
-      if (token = decode_token(token_encode)) && token['type'] == 'access'
-        user = User.find(token['user'])
-        { status: true, user: user_for_api(user: user) }
-      else
-        { status: false }
-      end
+  def jobs
+    GuestsCleanupJob.perform_later
+    render json: { ddd: 'dddddd'}
   end
 
   private
 
   def get_user_by_email(email:)
-    @user = User.find_by(email: email)
+    @user ||= User.find_by(email: email)
   end
 
   def get_user_by_id(id:)
-    @user = User.find(id)
+    @user ||= User.find(id)
   end
 
   def header_tokens(user:)
@@ -158,9 +160,5 @@ module Auth
   def current_lang
     lang = request.headers['Accept-Language']
     (/^(en|ru)/.match(lang) || 'en').to_s.to_sym
-  end
-
-  def user_for_api(user:)
-    user.slice(:username, :email, :lang)
   end
 end

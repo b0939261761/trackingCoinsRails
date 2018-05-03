@@ -16,8 +16,8 @@ end
 
 gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 
-gem 'whenever', require: false
 gem 'sidekiq'
+gem 'sidekiq-cron'
 
 gem 'bcrypt'
 gem 'passenger', require: "phusion_passenger/rack_handler"

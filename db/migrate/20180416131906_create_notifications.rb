@@ -23,12 +23,17 @@ class CreateNotifications < ActiveRecord::Migration[5.2]
       t.belongs_to :pair, foreign_key: { on_delete: :cascade }, null: false, comment: 'Валютная пара'
       t.column :direction, :e_direction, default: 'above', null: false, comment: 'Направление'
       t.decimal :price, precision: 18, scale: 8, default: 0, null: false, comment: 'Цена'
+      t.decimal :current_price, precision: 18, scale: 8, default: 0, null: false, comment: 'Текущая цена'
+      t.boolean :sended, null: false, default: false, comment: 'Отправлялось при изменении курса увеломление'
+      t.boolean :done, null: false, default: false, comment: 'Достиг курс нужной цены'
       t.boolean :activated, null: false, default: true, comment: 'Активный'
 
       t.datetime :created_at, null: false, default: -> { 'CURRENT_TIMESTAMP' }, comment: 'Дата создания записи'
       t.datetime :updated_at, null: false, default: -> { 'CURRENT_TIMESTAMP' }, comment: 'Дата обновления записи'
 
       t.index %i(user_id pair_id direction price), name: 'notifications_user_pair_direction_price', unique: true
+      t.index :done
+      t.index :activated
     end
 
     change_column_comment(table_name, :id, 'Уникальный идентификатор')

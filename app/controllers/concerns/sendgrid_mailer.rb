@@ -26,6 +26,7 @@ module SendgridMailer
       template_id: template_id
     }.to_json
 
+    p body
     response = Net::HTTP.post(
       MAIL_API_URL,
       body,
@@ -72,6 +73,30 @@ module SendgridMailer
       email_to: email,
       template_id: templates[lang],
       substitutions: substitutions
+    )
+  end
+
+  def send_price(email:, lang:, prices:)
+    rows = ''
+    prices.each do |o|
+      rows += '<tr style="border: 1px solid #B9B9B9; background-color: #E0E0E0; height: 50px; color: #000; padding: 10px;">' \
+        "<td>#{o[:currency]}</td>" \
+        "<td>#{o[:exchange]}</td>" \
+        '<td>??????</td>' \
+        "<td>#{o[:price]}</td>" \
+        "<td>#{o[:direction]}</td>"\
+      '</tr>'
+    end
+
+    templates = {
+      en: ENV['TEMPLATE_PRICE_EN'],
+      ru: ENV['TEMPLATE_PRICE_RU']
+    }
+
+    send_email(
+      email_to: email,
+      template_id: templates[lang.to_sym],
+      substitutions: { '<%rows%>': rows }
     )
   end
 end

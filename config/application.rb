@@ -26,5 +26,6 @@ module TrackingCoinsRails
     Dotenv::Railtie.load
 
     config.active_job.queue_adapter = :sidekiq
+    config.autoload_paths << "#{Rails.root}/lib"
   end
 end

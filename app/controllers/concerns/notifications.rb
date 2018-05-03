@@ -37,7 +37,8 @@ module Notifications
             ON CONFLICT ( user_id, pair_id, direction, price )
               DO UPDATE SET
                 direction = EXCLUDED.direction,
-                activated = EXCLUDED.activated
+                activated = EXCLUDED.activated,
+                sended = false
       SQL
       ActiveRecord::Base.connection.execute( sql )
     end

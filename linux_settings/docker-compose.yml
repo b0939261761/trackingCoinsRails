@@ -14,15 +14,15 @@ services:
         - '6379:6379'
       volumes:
         - coins-redis:/var/lib/redis/data:rw
-  app:
+  web:
     build: .
-    command: >
-      bash -c "
-      bundle check
-      || bundle install --clean
-      && rm -f tmp/pids/server.pid
-      && bundle exec rails db:migrate
-      && bundle exec rails server"
+    # command: >
+    #   bash -c "
+    #   bundle check
+    #   || bundle install --clean
+    #   && rm -f tmp/pids/server.pid
+    #   && bundle exec rails db:migrate
+    #   && bundle exec rails server"
     volumes:
       - .:/coins
     env_file:

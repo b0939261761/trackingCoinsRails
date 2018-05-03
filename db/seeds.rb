@@ -1,2 +1,1 @@
-
-Exchange.create(name: 'binare') unless Exchange.find_by(name: 'binare')
+Exchange.create(name: 'binance') unless Exchange.find_by(name: 'binance')

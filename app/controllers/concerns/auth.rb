@@ -3,17 +3,18 @@
 # Access to site
 module Auth
   include SendgridMailer
+  include CheckNotifications
 
   def check_user
-    render json: { check: !get_user_by_email(email: params[:email]).nil? }
+    render json: { check: !user_by_email(email: params[:email]).nil? }
   end
 
   def sign_in
     data = 200, { }
 
-    if (user = get_user_by_email(email: params[:email])) &&
-        user.authenticate(params[:password]) &&
-        user.confirmed
+    if (user = user_by_email(email: params[:email])) &&
+       user.authenticate(params[:password]) &&
+       user.confirmed
 
       header_tokens(user: user)
       data = { user: user_for_api(user: user) }
@@ -28,7 +29,7 @@ module Auth
     email = params[:email]
     status, data = 200, { }
 
-    if get_user_by_email(email: email)
+    if user_by_email(email: email)
       status = 400, { error: 'FAIL_EMAIL_EXISTS' }
     else
       par = params.permit(:username, :email, :password).merge(lang: current_lang)
@@ -46,7 +47,7 @@ module Auth
     email = params[:email]
     status, data = 200, { }
 
-    if (user = get_user_by_email(email: email)) && !user.confirmed
+    if (user = user_by_email(email: email)) && !user.confirmed
       if send_confirmation(user_id: user.id, email: email, lang: current_lang)
         status, data = 400, { error: 'FAIL_SEND' }
       end
@@ -62,7 +63,7 @@ module Auth
     status, data = 200, { }
 
     if token && token['type'] == 'registration'
-      user = get_user_by_id(id: token['user'])
+      user = user_by_id(id: token['user'])
       user.update(confirmed: true)
 
       header_tokens(user: user)
@@ -78,7 +79,7 @@ module Auth
     email = params[:email]
     status, data = 200, { }
 
-    if (user = get_user_by_email(email: email))
+    if (user = user_by_email(email: email))
       if send_recovery(user_id: user.id, email: email, lang: current_lang)
         status, data = 400, { error: 'FAIL_SEND' }
       end
@@ -94,7 +95,6 @@ module Auth
     status, data = 200, { }
 
     unless token && token['type'] == 'recovery'
-    token = decode_token(bearer_token)
       status, data = 403, { error: 'FAIL_RECOVERY' }
     end
 
@@ -106,7 +106,7 @@ module Auth
     status, data = 200, { }
 
     if token && token['type'] == 'recovery'
-      user = get_user_by_id(id: token['user'])
+      user = user_by_id(id: token['user'])
       user.update(password: params[:password])
 
       header_tokens(user: user)
@@ -123,7 +123,7 @@ module Auth
     status = 200
 
     if (token = decode_token(token_encode)) && token['type'] == 'refresh'
-      user = get_user_by_id(id: token['user'])
+      user = user_by_id(id: token['user'])
 
       if user.refresh_token == token_encode
         header_tokens(user: user)
@@ -138,17 +138,17 @@ module Auth
   end
 
   def jobs
-    GuestsCleanupJob.perform_later
-    render json: { ddd: 'dddddd'}
+    result = check_notifications
+    render json: { ddd: result }
   end
 
   private
 
-  def get_user_by_email(email:)
+  def user_by_email(email:)
     @user ||= User.find_by(email: email)
   end
 
-  def get_user_by_id(id:)
+  def user_by_id(id:)
     @user ||= User.find(id)
   end
 

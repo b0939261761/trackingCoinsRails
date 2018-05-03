@@ -4,6 +4,6 @@ staging:
 production:
   :concurrency: 20
 :queues:
-  - critical
+  - exchanges
   - default
   - low

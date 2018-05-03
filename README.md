@@ -1,24 +1,30 @@
-# README
+# For Docker
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+## Docker clean
 
-Things you may want to cover:
+```bash
+# Stop all containers
+docker stop $(docker ps -a -q)
+# Delete all containers
+docker rm $(docker ps -a -q)
+# Delete all images
+docker rmi $(docker images -q)
+# Remove all system volumes
+docker volume rm $(docker volume ls -q)
+```
 
-* Ruby version
+## First step
 
-* System dependencies
+```bash
+docker-compose build
+docker-compose run app bash -c 'bundle check || bundle install --clean'
+docker-compose run app bundle exec rails db:create db:migrate db:seed
+```
 
-* Configuration
+## Additional command
 
-* Database creation
-
-* Database initialization
-
-* How to run the test suite
-
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+```bash
+docker-compose up --build
+docker-compose down
+docker-compose run app bash
+```

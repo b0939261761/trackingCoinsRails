@@ -21,6 +21,3 @@ gem 'sidekiq-cron'
 
 gem 'bcrypt'
 gem 'passenger', require: "phusion_passenger/rack_handler"
-
-# gem 'puma'
-# gem 'bcrypt', git: 'https://github.com/codahale/bcrypt-ruby.git'

@@ -25,6 +25,7 @@ docker-compose run app bundle exec rails db:create db:migrate db:seed
 
 ```bash
 docker-compose up --build
+docker-compose up --detach
 docker-compose down
 docker-compose run app bash
 ```

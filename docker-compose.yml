@@ -23,15 +23,15 @@ services:
       && rm -f tmp/pids/server.pid
       && bundle exec rails db:migrate
       && bundle exec rails server"
+    ports:
+      - '8080:8080'
     volumes:
       - .:/coins
     env_file:
       - .env
-    ports:
-      - '8090:8090'
     depends_on:
       - db
-      - redis
+      # - redis
     stdin_open: true
   sidekiq:
     build: .
@@ -41,17 +41,17 @@ services:
     env_file:
       - .env
     depends_on:
-      # - db
       - redis
   nginx:
-    image: nginx
+    image: nginx:alpine
     depends_on:
       - app
     volumes:
-      - ./nginx.conf:/etc/nginx/conf.d/my_app.conf:ro
-      # - .:/coins
+      - ./nginx.conf:/etc/nginx/conf.d/nginx.conf:ro
+      - ./site:/var/www/coins
     ports:
-      - '8080:8080'
+      - '8090:8090'
+      - '80:80'
 volumes:
   coins-postgres:
   coins-redis:

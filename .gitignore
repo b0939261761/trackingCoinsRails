@@ -11,3 +11,4 @@
 /gems
 /db/schema.rb
 nginx.conf
+/site/letsencrypt/*

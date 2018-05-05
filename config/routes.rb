@@ -5,6 +5,8 @@ Rails.application.routes.draw do
   require 'sidekiq/cron/web'
   mount Sidekiq::Web => '/sidekiq'
 
+  root action: :root, controller: :api
+
   post :jobs, controller: :api
   post :sign_up, controller: :api
   post :sign_in, controller: :api

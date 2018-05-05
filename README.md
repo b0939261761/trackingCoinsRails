@@ -30,7 +30,7 @@ docker-compose down
 docker-compose run app bash
 ```
 
-Create file
+## Create service file
 
 ```bash
 vim /lib/systemd/system/coins.service
@@ -74,4 +74,61 @@ Run docker-compose project
 sudo systemctl enable coins
 sudo systemctl start coins
 sudo systemctl status coins
+sudo systemctl restart coins
+```
+
+## Docker certbot
+
+Add certificate
+
+```bash
+sudo docker run --rm --name certbot -v "/var/www/coins/site/letsencrypt:/etc/letsencrypt" certbot/certbot certonly --webroot --agree-tos --manual-public-ip-logging-ok --domains realitycoins.cf --email b****@gmail.com --webroot-path /etc/letsencrypt
+```
+
+Update certificate
+
+```bash
+sudo docker run --rm --name certbot -v "/var/www/coins/site/letsencrypt:/etc/letsencrypt" certbot/certbot renew
+```
+
+## nginx.conf
+
+```txt
+# disable when not https
+ssl_certificate ssl/coins/live/realitycoins.cf/fullchain.pem;
+ssl_certificate_key ssl/coins/live/realitycoins.cf/privkey.pem;
+
+server {
+  listen 80;
+  listen [::]:80; #Added IPv6 here too
+
+  # for certbot
+  location ^~ /.well-known/acme-challenge/ {
+    root /var/www/coins/letsencrypt;
+  }
+
+  # disable when not https
+  return 301 https://realitycoins.cf$request_uri;
+}
+
+server {
+  listen 8090 ssl;
+  listen [::]:8090 ssl;
+
+  location / {
+    proxy_pass http://app:8080;
+  }
+}
+
+server {
+  listen 443 ssl;
+  listen [::]:443 ssl;
+
+  root /var/www/coins;
+
+  # for SPA
+  location / {
+    try_files $uri $uri/ /index.html;
+  }
+}
 ```

@@ -5,6 +5,7 @@ module Auth
   include SendgridMailer
   include Coinmarketcap
 
+  def root; end
 
   def check_user
     render json: { check: !user_by_email(email: params[:email]).nil? }

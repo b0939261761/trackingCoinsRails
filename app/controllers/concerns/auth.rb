@@ -3,7 +3,8 @@
 # Access to site
 module Auth
   include SendgridMailer
-  include CheckNotifications
+  include Coinmarketcap
+
 
   def check_user
     render json: { check: !user_by_email(email: params[:email]).nil? }
@@ -138,8 +139,8 @@ module Auth
   end
 
   def jobs
-    result = check_notifications
-    render json: { ddd: result }
+
+    render json: { ddd: coinmarketcap }
   end
 
   private

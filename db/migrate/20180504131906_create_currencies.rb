@@ -1,17 +1,16 @@
-# frozen_string_literal: true
-
-class CreatePairs < ActiveRecord::Migration[5.1]
+class CreateCurrencies < ActiveRecord::Migration[5.2]
   def change
-    table_name = :pairs
+    table_name = :currencies
 
-    create_table table_name, comment: 'Валютные пары' do |t|
-      t.belongs_to :exchange, foreign_key: { on_delete: :cascade }, null: false, comment: 'Биржи'
-      t.string :symbol, limit: 10, default: '', null: false, comment: 'Символ валют'
+    create_table table_name, comment: 'Справочник валют' do |t|
+      t.string :symbol, limit: 10, default: '', null: false, comment: 'Символ валюты'
+      t.string :name, limit: 50, default: '', null: false, comment: 'Нименование валюты'
+      t.string :slug, limit: 50, default: '', null: false, comment: 'Слаг валюты'
 
       t.datetime :created_at, null: false, default: -> { 'CURRENT_TIMESTAMP' }, comment: 'Дата создания записи'
       t.datetime :updated_at, null: false, default: -> { 'CURRENT_TIMESTAMP' }, comment: 'Дата обновления записи'
 
-      t.index [ :exchange_id, :symbol ], unique: true
+      t.index :symbol, unique: true
     end
 
     change_column_comment(table_name, :id, 'Уникальный идентификатор')

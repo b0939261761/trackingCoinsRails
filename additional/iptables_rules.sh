@@ -62,8 +62,10 @@ $IPT -A INPUT -i $WAN -p tcp --dport 22 -j ACCEPT
 #$IPT -A INPUT -i $WAN -p udp --dport 123 -j ACCEPT
 # Открываем порт для PostgreSQL
 $IPT -A INPUT -i $WAN -p tcp --dport 5432 -j ACCEPT
-# Открываем порт для Vue
+# Открываем http для Vue
 $IPT -A INPUT -i $WAN -p tcp --dport 80 -j ACCEPT
+# Открываем https для Vue
+$IPT -A INPUT -i $WAN -p tcp --dport 443 -j ACCEPT
 # Открываем порт для Rails server
 $IPT -A INPUT -i $WAN -p tcp --dport 8090 -j ACCEPT
 

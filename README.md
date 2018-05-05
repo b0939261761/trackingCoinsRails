@@ -29,3 +29,49 @@ docker-compose up --detach
 docker-compose down
 docker-compose run app bash
 ```
+
+Create file
+
+```bash
+vim /lib/systemd/system/coins.service
+```
+
+```txt
+[Unit]
+Description=Docker compose for services
+After=docker.service
+Conflicts=shutdown.target reboot.target halt.target
+
+[Service]
+Restart=always
+RestartSec=10
+ExecStart=/usr/local/bin/docker-compose  -f /var/www/coins/docker-compose.yml up
+ExecStop=/usr/local/bin/docker-compose  -f /var/www/coins/docker-compose.yml down
+LimitNOFILE=infinity
+LimitNPROC=infinity
+LimitCORE=infinity
+TimeoutStartSec=10
+TimeoutStopSec=30
+StartLimitBurst=3
+StartLimitInterval=60s
+NotifyAccess=all
+
+[Install]
+WantedBy=multi-user.target
+```
+
+Run docker
+
+```bash
+sudo systemctl enable docker
+sudo systemctl start docker
+sudo systemctl status docker
+```
+
+Run docker-compose project
+
+```bash
+sudo systemctl enable coins
+sudo systemctl start coins
+sudo systemctl status coins
+```

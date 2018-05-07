@@ -52,10 +52,6 @@ GEM
     concurrent-ruby (1.0.5)
     connection_pool (2.2.1)
     crass (1.0.4)
-    dotenv (2.2.2)
-    dotenv-rails (2.2.2)
-      dotenv (= 2.2.2)
-      railties (>= 3.2, < 6.0)
     erubi (1.7.1)
     et-orbi (1.1.0)
       tzinfo
@@ -155,7 +151,6 @@ DEPENDENCIES
   bcrypt
   bootsnap
   byebug
-  dotenv-rails
   jwt
   passenger
   pg

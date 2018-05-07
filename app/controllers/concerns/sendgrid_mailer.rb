@@ -98,17 +98,19 @@ module SendgridMailer
       price = o[:price].to_f
       diff = current_price - price
       percent = (current_price / price * 100).round(3)
-
-      rows += '<tr style="background-color: #fff; height: 50px; color: #000; font-size:14px; color: #333333; text-align: right;background-color: #e2e2e2">' \
-        "<td style=\"border-width: 0; border-bottom: 1px dotted #777; border-left: 1px dotted #777; text-align: center;\">#{o[:currency]}</td>" \
-        "<td style=\"border-width: 0; border-bottom: 1px dotted #777; text-align: left;\">#{o[:exchange]}</td>" \
-        '<td style="border-width: 0; border-bottom: 1px dotted #777; text-align: center;">' \
+      last = o == prices[-1]
+      style_border = 'border-width: 0; border-bottom: 1px solid #caa9a9;'
+      rows += '<tr style="background-color: #ffffff; height: 50px; color: #000000; font-size:14px; color: #333333; text-align: right;">' \
+        "<td style=\"#{last ? 'border-radius: 0 0 0 8px;' : ''}#{style_border} border-left: 1px solid #caa9a9; text-align: center;\">#{o[:currency]}</td>" \
+        "<td style=\"#{style_border} text-align: left;\">#{o[:exchange]}</td>" \
+        "<td style=\"#{style_border} text-align: center;\">" \
           "<span style=\"color: #{direction[:icon_color]};\">#{direction[:icon]}</span> #{direction[:text]}" \
         '</td>' \
-        "<td style=\"border-width: 0; border-bottom: 1px dotted #777;\">#{format_number(price)}</td>" \
-        "<td style=\"border-width: 0; border-bottom: 1px dotted #777;\">#{format_number(current_price)}</td>" \
-        "<td style=\"border-width: 0; border-bottom: 1px dotted #777;\">#{format_number(diff)}</td>" \
-        "<td style=\"border-bottom: 1px dotted #777; border-rigth: 1px dotted #777;\">#{format_number(percent)}</td>" \
+        "<td style=\"#{style_border}\">#{format_number(price)}</td>" \
+        "<td style=\"#{style_border}\">#{format_number(current_price)}</td>" \
+        "<td style=\"#{style_border}\">#{format_number(diff)}</td>" \
+        "<td style=\"#{last ? 'border-radius: 0 0 8px 0;' : ''}#{style_border} border-right: 1px solid #caa9a9;\">
+           #{format_number(percent)}</td>" \
       '</tr>'
     end
 

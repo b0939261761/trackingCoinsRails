@@ -23,8 +23,6 @@ module TrackingCoinsRails
     config.active_record.record_timestamps = false
     config.api_only = true
 
-    Dotenv::Railtie.load
-
     config.active_job.queue_adapter = :sidekiq
     config.autoload_paths << "#{Rails.root}/lib"
   end

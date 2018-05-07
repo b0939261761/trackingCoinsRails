@@ -7,7 +7,6 @@ gem 'rack-cors'
 gem 'jwt'
 gem 'rails', '~> 5.2.0'
 gem 'pg'
-gem 'dotenv-rails'
 gem 'bootsnap', require: false
 
 group :development, :test do

@@ -30,7 +30,6 @@ module SendgridMailer
       template_id: template_id
     }.to_json
 
-    body
     response = Net::HTTP.post(
       MAIL_API_URL,
       body,

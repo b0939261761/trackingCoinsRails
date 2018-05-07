@@ -5,7 +5,7 @@ class ExchangesGetPriceJob < ApplicationJob
   include CheckNotifications
 
   def perform
-    # binance
-    # check_notifications
+    binance
+    check_notifications
   end
 end

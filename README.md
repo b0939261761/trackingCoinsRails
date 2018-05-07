@@ -132,3 +132,5 @@ server {
   }
 }
 ```
+
+## Add to cron *certbot_renew.sh*. Readme inside file.

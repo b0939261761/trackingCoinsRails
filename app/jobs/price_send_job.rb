@@ -1,7 +1,7 @@
 class PriceSendJob < ApplicationJob
   include SendgridMailer
 
-  queue_as :low
+  queue_as :notifications
 
   def perform(*args)
     send_price(*args)

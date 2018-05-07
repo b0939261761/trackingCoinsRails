@@ -5,5 +5,5 @@ production:
   :concurrency: 20
 :queues:
   - exchanges
+  - notifications
   - default
-  - low

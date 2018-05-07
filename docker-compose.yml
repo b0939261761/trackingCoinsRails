@@ -31,7 +31,6 @@ services:
       - .env
     depends_on:
       - db
-      # - redis
     stdin_open: true
   sidekiq:
     build: .
@@ -43,7 +42,7 @@ services:
     depends_on:
       - redis
   nginx:
-    image: nginx
+    image: nginx:alpine
     depends_on:
       - app
     volumes:

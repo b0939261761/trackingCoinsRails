@@ -3,7 +3,7 @@
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
     origins(/localhost:\d*/,
-            '195.201.121.179',
+            '192.168.5.141',
             'realitycoins.cf')
 
     resource '*',

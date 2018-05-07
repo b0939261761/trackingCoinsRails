@@ -4,6 +4,12 @@
 module Auth
   include SendgridMailer
   include Coinmarketcap
+  # include CheckNotifications
+
+  def test
+
+    # render json: { ddd: check_notifications }
+  end
 
   def root; end
 
@@ -137,11 +143,6 @@ module Auth
     end
 
     render json: { }, status: status
-  end
-
-  def jobs
-
-    render json: { ddd: coinmarketcap }
   end
 
   private

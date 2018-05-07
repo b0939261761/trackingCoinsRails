@@ -17,7 +17,8 @@ module CheckNotifications
         cc.symbol as currency,
         bb.name AS exchange,
         aa.direction,
-        aa.current_price as price,
+        aa.price,
+        aa.current_price as current_price,
         dd.username,
         dd.lang
       FROM get_notifications aa
@@ -32,8 +33,9 @@ module CheckNotifications
     result
       .group_by { |o| o[:email] }
       .each do |email, data|
-        prices = data.map { |o| o.slice(:currency, :exchange, :direction, :price) }
-        PriceSendJob.perform_later(email: email, lang: data[0][:lang], prices: prices)
+        prices = data.map { |o| o.slice(:currency, :exchange, :direction, :price, :current_price) }
+        lang = data[0][:lang]
+        PriceSendJob.perform_later(email: email, lang: lang, prices: prices)
       end
   end
 end

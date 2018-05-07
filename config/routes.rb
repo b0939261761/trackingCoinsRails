@@ -7,7 +7,7 @@ Rails.application.routes.draw do
 
   root action: :root, controller: :api
 
-  post :jobs, controller: :api
+  post :test, controller: :api
   post :sign_up, controller: :api
   post :sign_in, controller: :api
 

@@ -60,7 +60,7 @@ services:
     ports:
       - 8090:8090
       - 80:80
-      - 443:44'
+      - 443:44
 volumes:
   coins-postgres:
   coins-redis:

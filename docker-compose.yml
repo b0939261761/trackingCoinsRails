@@ -33,7 +33,7 @@ services:
     ports:
       - $PORT:$PORT
     volumes:
-      - .:/coins
+      - .:$APP_HOME
     environment:
       DATABASE_URL: postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB?pool=$POSTGRES_POOL
       REDIS_PROVIDER: redis://:$REDIS_PASSWORD@$REDIS_HOST:$REDIS_PORT?db=$REDIS_DB
@@ -43,9 +43,9 @@ services:
 
   sidekiq:
     build: .
-    command: bash -c "cd $APP_HOME && bundle exec sidekiq -C config/sidekiq.yml
+    command: bash -c "cd $APP_HOME && bundle exec sidekiq -C config/sidekiq.yml"
     volumes:
-      - .:/coins
+      - .:$APP_HOME
     environment:
       DATABASE_URL: postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB?pool=$POSTGRES_POOL
       REDIS_PROVIDER: redis://:$REDIS_PASSWORD@$REDIS_HOST:$REDIS_PORT?db=$REDIS_DB

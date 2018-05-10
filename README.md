@@ -1,5 +1,12 @@
 # For Docker
 
+## Other
+
+```bahs
+# Change credentials
+docker-compose run app bundle exec rails credentials:edit
+```
+
 ## Docker clean
 
 ```bash
@@ -47,8 +54,9 @@ Conflicts=shutdown.target reboot.target halt.target
 [Service]
 Restart=always
 RestartSec=10
-ExecStart=/usr/local/bin/docker-compose  -f /var/www/coins/docker-compose.yml up
-ExecStop=/usr/local/bin/docker-compose  -f /var/www/coins/docker-compose.yml down
+WorkingDirectory=/var/www/coins
+ExecStart=/usr/local/bin/docker-compose up
+ExecStop=/usr/local/bin/docker-compose down
 LimitNOFILE=infinity
 LimitNPROC=infinity
 LimitCORE=infinity
@@ -73,6 +81,7 @@ sudo systemctl status docker
 Run docker-compose project
 
 ```bash
+sudo systemctl daemon-reload
 sudo systemctl enable coins
 sudo systemctl start coins
 sudo systemctl status coins

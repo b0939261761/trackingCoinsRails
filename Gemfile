@@ -20,3 +20,5 @@ gem 'sidekiq-cron'
 
 gem 'bcrypt'
 gem 'passenger', require: "phusion_passenger/rack_handler"
+
+gem 'telegram-bot'

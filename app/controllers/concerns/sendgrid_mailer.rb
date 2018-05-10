@@ -13,8 +13,9 @@ module SendgridMailer
 
   FROM_NAME = 'Rails Coins'
 
-  def format_number(value)
-    ActiveSupport::NumberHelper.number_to_delimited(value, delimiter: ' ', separator: '.')
+  def format_number(value, precision = 8)
+    ActiveSupport::NumberHelper.number_to_rounded(value,
+      delimiter: ' ', separator: '.', precision: precision, strip_insignificant_zeros: true)
   end
 
   def send_email(email_to:, template_id:, substitutions:)
@@ -97,20 +98,21 @@ module SendgridMailer
       current_price = o[:current_price].to_f
       price = o[:price].to_f
       diff = current_price - price
-      percent = (current_price / price * 100).round(3)
+      percent = (current_price / price - 1) * 100
       last = o == prices[-1]
       style_border = 'border-width: 0; border-bottom: 1px solid #caa9a9;'
-      rows += '<tr style="background-color: #ffffff; height: 50px; color: #000000; font-size:14px; color: #333333; text-align: right;">' \
-        "<td style=\"#{last ? 'border-radius: 0 0 0 8px;' : ''}#{style_border} border-left: 1px solid #caa9a9; text-align: center;\">#{o[:currency]}</td>" \
-        "<td style=\"#{style_border} text-align: left;\">#{o[:exchange]}</td>" \
-        "<td style=\"#{style_border} text-align: center;\">" \
+
+      rows += '<tr style="background-color: #ffffff; height: 50px; color: #000000; font-size:14px; color: #333333; text-align: center;">' \
+        "<td style=\"#{last ? 'border-radius: 0 0 0 8px;' : ''}#{style_border} border-left: 1px solid #caa9a9;\">#{o[:currency]}</td>" \
+        "<td style=\"#{style_border}\">#{o[:exchange]}</td>" \
+        "<td style=\"#{style_border}\">" \
           "<span style=\"color: #{direction[:icon_color]};\">#{direction[:icon]}</span> #{direction[:text]}" \
         '</td>' \
         "<td style=\"#{style_border}\">#{format_number(price)}</td>" \
         "<td style=\"#{style_border}\">#{format_number(current_price)}</td>" \
         "<td style=\"#{style_border}\">#{format_number(diff)}</td>" \
         "<td style=\"#{last ? 'border-radius: 0 0 8px 0;' : ''}#{style_border} border-right: 1px solid #caa9a9;\">
-           #{format_number(percent)}</td>" \
+           #{format_number(percent, 3)}%</td>" \
       '</tr>'
     end
 

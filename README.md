@@ -1,7 +1,5 @@
 # For Docker
 
-
-
 ## Docker clean
 
 ```bash
@@ -9,6 +7,8 @@
 docker stop $(docker ps -a -q)
 # Delete all containers
 docker rm $(docker ps -a -q)
+# Delete all network
+docker network rm $(docker network ls --quiet)
 # Delete all images
 docker rmi $(docker images -q)
 # Remove all system volumes
@@ -135,4 +135,4 @@ server {
 }
 ```
 
-## Add to cron *certbot_renew.sh*. Readme inside file.
+## Add to cron *certbot_renew.sh*. Readme inside file

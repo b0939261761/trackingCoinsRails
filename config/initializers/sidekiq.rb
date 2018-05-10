@@ -1,5 +1,8 @@
+# redis = { url: ENV['REDIS_PROVIDER'], password: ENV['REDIS_PASSWORD'] }
+redis = { url: ENV['REDIS_PROVIDER'] }
+
 Sidekiq.configure_server do |config|
-  config.redis = { url: ENV['REDIS_PROVIDER'] }
+  config.redis = redis
 
   schedule_file = 'config/schedule.yml'
   if File.exist?(schedule_file)
@@ -8,5 +11,5 @@ Sidekiq.configure_server do |config|
 end
 
 Sidekiq.configure_client do |config|
-  config.redis = { url: ENV['REDIS_PROVIDER'] }
+  config.redis = redis
 end

@@ -4,11 +4,9 @@
 module Auth
   include SendgridMailer
   include Coinmarketcap
-  # include CheckNotifications
+  include CheckNotifications
 
   def test
-
-    # render json: { ddd: check_notifications }
   end
 
   def root; end

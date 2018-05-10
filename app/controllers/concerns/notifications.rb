@@ -2,7 +2,6 @@
 
 #
 module Notifications
-
   def get_exchanges
     render json: { exchanges: Exchange.select(:id, :name) }
   end
@@ -15,7 +14,7 @@ module Notifications
     if (id = params[:id].nonzero?)
       par = params.permit(:exchange_id, :pair_id, :direction, :price, :activated)
       notification = Notification.find_by(id: id, user_id: user_id)
-      notification.destroy unless notification.update(par)
+      notification.destroy unless notification.update(par.merge(sended: false))
     else
       sql = <<-SQL
         INSERT INTO notifications (

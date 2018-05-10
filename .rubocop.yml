@@ -1,7 +1,4 @@
-AllCops:
-  TargetRubyVersion: 2.4.3
-
-Style/EndOfLine:
+SStyle/EndOfLine:
   EnforcedStyle: lf
 
 Metrics/MethodLength:
@@ -9,3 +6,9 @@ Metrics/MethodLength:
 
 Metrics/ModuleLength:
   Max: 200
+
+Metrics/LineLength:
+  Max: 150
+
+Style/DocumentationMethod
+  Disabled: true

@@ -1,5 +1,10 @@
+# frozen_string_literal: true
+
 Rails.application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
+
+  # for Telegram bot
+  routes.default_url_options = { host: ENV['TELEGRAM_BOT_HOST_PORT'], protocol: :https }
 
   # Code is not reloaded between requests.
   config.cache_classes = true

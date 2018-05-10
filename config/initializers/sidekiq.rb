@@ -1,4 +1,3 @@
-# redis = { url: ENV['REDIS_PROVIDER'], password: ENV['REDIS_PASSWORD'] }
 redis = { url: ENV['REDIS_PROVIDER'] }
 
 Sidekiq.configure_server do |config|

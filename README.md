@@ -93,7 +93,7 @@ sudo systemctl restart coins
 Add certificate
 
 ```bash
-sudo docker run --rm --name certbot -v "/var/www/coins/site/letsencrypt:/etc/letsencrypt" certbot/certbot certonly --webroot --agree-tos --manual-public-ip-logging-ok --domains realitycoins.cf --email b****@gmail.com --webroot-path /etc/letsencrypt
+sudo docker run --rm --name certbot -v "/var/www/coins/site/letsencrypt:/etc/letsencrypt" certbot/certbot certonly --webroot --agree-tos --manual-public-ip-logging-ok --domains domain.name --email example@example.com --webroot-path /etc/letsencrypt
 ```
 
 Update certificate
@@ -145,3 +145,27 @@ server {
 ```
 
 ## Add to cron *certbot_renew.sh*. Readme inside file
+
+## Telegram bot
+
+For more information, see:
+<https://www.rubydoc.info/gems/telegram-bot/0.4.2>
+<https://github.com/telegram-bot-rb/telegram-bot>
+
+### Add row in /config/environments/production.rb
+
+```ruby
+routes.default_url_options = { host: ENV['TELEGRAM_BOT_HOST_PORT'], protocol: :https }
+```
+
+### Add file /config/initializers/telegram_bot.rb
+
+```ruby
+Telegram.bots_config = { default: ENV['TELEGRAM_BOT_TOKEN'] }
+```
+
+### Setup webhooks, check after setup <https://api.telegram.org/bot[TOKEN]/getWebhookInfo>
+
+```bash
+docker-compose run app bundle exec rake telegram:bot:set_webhook RAILS_ENV=production
+```bash

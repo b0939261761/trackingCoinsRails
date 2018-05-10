@@ -5,7 +5,7 @@ Rails.application.routes.draw do
   require 'sidekiq/cron/web'
   mount Sidekiq::Web => '/sidekiq'
 
-  # telegram_webhook Telegram::WebhookController
+  telegram_webhook Telegram::WebhookController
 
   root action: :root, controller: :api
 

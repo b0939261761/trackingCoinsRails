@@ -4,7 +4,8 @@
 module SendgridMailer
   require 'net/http'
 
-  MAIL_API_URL = URI('https://api.sendgrid.com/v3/mail/send')
+  MAIL_API_URL = URI(SENDGRID_API_URL)
+  WEB_URL = ENV['WEB_URL']
 
   MAIL_HEADER = {
     authorization: "Bearer #{ENV['SENDGRID_API_KEY']}",
@@ -46,7 +47,7 @@ module SendgridMailer
 
   def send_confirmation(user_id:, email:, lang:)
     substitutions = {
-      '<%link%>': "#{ENV['SITE_URL']}/confirm_registration?token=" \
+      '<%link%>': "#{WEB_URL}/confirm_registration?token=" \
                   "#{registration_token(user_id: user_id)}"
     }
 
@@ -64,7 +65,7 @@ module SendgridMailer
 
   def send_recovery(user_id:, email:, lang:)
     substitutions = {
-      '<%link%>': "#{ENV['SITE_URL']}/confirm_recovery?token=" \
+      '<%link%>': "#{WEB_URL}/confirm_recovery?token=" \
                   "#{recovery_token(user_id: user_id)}"
     }
 

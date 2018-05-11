@@ -21,7 +21,10 @@ services:
         - coins-redis:/var/lib/redis/data
 
   app:
-    build: .
+    build:
+      context: .
+      args:
+        APP_HOME: $APP_HOME
     command: >
       bash -c "
       bundle check
@@ -37,13 +40,17 @@ services:
       DATABASE_URL: postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB?pool=$POSTGRES_POOL
       REDIS_PROVIDER: redis://:$REDIS_PASSWORD@$REDIS_HOST:$REDIS_PORT?db=$REDIS_DB
       BUNDLE_PATH: ${APP_HOME}/gems
-    env_file:
-      - .env
+    env_file: .env
     depends_on:
       - db
+      - redis
+      - sidekiq
 
   sidekiq:
-    build: .
+    build:
+      context: .
+      args:
+        APP_HOME: $APP_HOME
     command: bundle exec sidekiq -C config/sidekiq.yml
     volumes:
       - .:$APP_HOME
@@ -51,10 +58,7 @@ services:
       DATABASE_URL: postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@$POSTGRES_HOST:$POSTGRES_PORT/$POSTGRES_DB?pool=$POSTGRES_POOL
       REDIS_PROVIDER: redis://:$REDIS_PASSWORD@$REDIS_HOST:$REDIS_PORT?db=$REDIS_DB
       BUNDLE_PATH: ${APP_HOME}/gems
-    env_file:
-      - .env
-    depends_on:
-      - redis
+    env_file: .env
 
   nginx:
     image: nginx:alpine

@@ -126,6 +126,10 @@ server {
   listen 8090 ssl;
   listen [::]:8090 ssl;
 
+  # for telegram bot
+  listen 8443 ssl;
+
+
   location / {
     proxy_pass http://app:8080;
   }
@@ -142,6 +146,8 @@ server {
     try_files $uri $uri/ /index.html;
   }
 }
+
+
 ```
 
 ## Add to cron *certbot_renew.sh*. Readme inside file

@@ -168,4 +168,10 @@ Telegram.bots_config = { default: ENV['TELEGRAM_BOT_TOKEN'] }
 
 ```bash
 docker-compose run app bundle exec rake telegram:bot:set_webhook RAILS_ENV=production
+```
+
+### Run bot for test - poller-mode
+
 ```bash
+docker-compose run app bundle exec rake telegram:bot:poller
+``

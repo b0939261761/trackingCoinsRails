@@ -24,8 +24,7 @@ services:
     build: .
     command: >
       bash -c "
-      cd $APP_HOME
-      && bundle check
+      bundle check
       || bundle install --clean
       && rm -f tmp/pids/server.pid
       && bundle exec rails db:migrate
@@ -40,10 +39,12 @@ services:
       BUNDLE_PATH: ${APP_HOME}/gems
     env_file:
       - .env
+    depends_on:
+      - db
 
   sidekiq:
     build: .
-    command: bash -c "cd $APP_HOME && bundle exec sidekiq -C config/sidekiq.yml"
+    command: bundle exec sidekiq -C config/sidekiq.yml
     volumes:
       - .:$APP_HOME
     environment:
@@ -52,6 +53,8 @@ services:
       BUNDLE_PATH: ${APP_HOME}/gems
     env_file:
       - .env
+    depends_on:
+      - redis
 
   nginx:
     image: nginx:alpine
@@ -66,6 +69,7 @@ services:
       - 80:80
       - 443:443
       - 8443:8443
+
 volumes:
   coins-postgres:
   coins-redis:

@@ -4,7 +4,7 @@
 module SendgridMailer
   require 'net/http'
 
-  MAIL_API_URL = URI(SENDGRID_API_URL)
+  MAIL_API_URL = URI(ENV['SENDGRID_API_URL'])
   WEB_URL = ENV['WEB_URL']
 
   MAIL_HEADER = {
@@ -125,7 +125,10 @@ module SendgridMailer
     send_email(
       email_to: email,
       template_id: templates[lang],
-      substitutions: { '<%rows%>': rows }
+      substitutions: {
+        '<%rows%>': rows,
+        '<%link%>': WEB_URL
+      }
     )
   end
 end

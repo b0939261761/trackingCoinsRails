@@ -7,6 +7,7 @@ module Auth
   include CheckNotifications
 
   def test
+    render json: { check: check_notifications }
   end
 
   def root; end

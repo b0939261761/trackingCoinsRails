@@ -14,11 +14,6 @@ module SendgridMailer
 
   FROM_NAME = 'Rails Coins'
 
-  def format_number(value, precision = 8)
-    ActiveSupport::NumberHelper.number_to_rounded(value,
-      delimiter: ' ', separator: '.', precision: precision, strip_insignificant_zeros: true)
-  end
-
   def send_email(email_to:, template_id:, substitutions:)
     body = {
       personalizations: [{
@@ -83,38 +78,33 @@ module SendgridMailer
 
   def send_price(email:, lang:, prices:)
     lang = lang.to_sym
-    direction_text = {
-      en: { less: 'Low', above: 'High' },
-      ru: { less: 'Меньше', above: 'Больше' }
-    }
 
     dirrections = {
-      less: { text: direction_text[lang][:less], icon: '&darr;', icon_color: 'green' },
-      above: { text: direction_text[lang][:above], icon: '&uarr;', icon_color: 'blue' }
+      less: { icon: '&darr;', icon_color: 'red' },
+      above: { icon: '&uarr;', icon_color: 'green' }
     }
 
     rows = ''
     prices.each do |o|
       direction = dirrections[ o[:direction].to_sym ]
-      current_price = o[:current_price].to_f
-      price = o[:price].to_f
-      diff = current_price - price
-      percent = (current_price / price - 1) * 100
       last = o == prices[-1]
       style_border = 'border-width: 0; border-bottom: 1px solid #caa9a9;'
 
-      rows += '<tr style="background-color: #ffffff; height: 50px; color: #000000; font-size:14px; color: #333333; text-align: center;">' \
-        "<td style=\"#{last ? 'border-radius: 0 0 0 8px;' : ''}#{style_border} border-left: 1px solid #caa9a9;\">#{o[:currency]}</td>" \
-        "<td style=\"#{style_border}\">#{o[:exchange]}</td>" \
-        "<td style=\"#{style_border}\">" \
-          "<span style=\"color: #{direction[:icon_color]};\">#{direction[:icon]}</span> #{direction[:text]}" \
-        '</td>' \
-        "<td style=\"#{style_border}\">#{format_number(price)}</td>" \
-        "<td style=\"#{style_border}\">#{format_number(current_price)}</td>" \
-        "<td style=\"#{style_border}\">#{format_number(diff)}</td>" \
-        "<td style=\"#{last ? 'border-radius: 0 0 8px 0;' : ''}#{style_border} border-right: 1px solid #caa9a9;\">
-           #{format_number(percent, 3)}%</td>" \
-      '</tr>'
+      rows += text = <<~TEXT
+        <tr style="background-color: #ffffff; height: 50px; color: #000000; font-size:14px; color: #333333; text-align: center;">
+          <td style="#{last ? 'border-radius: 0 0 0 8px;' : ''}#{style_border} border-left: 1px solid #caa9a9;">
+            #{o[:currency]}</td>
+          <td style="#{style_border}">#{o[:exchange]}</td>
+          <td style="#{style_border}">
+            <span style=\"color: #{direction[:icon_color]};\">#{direction[:icon]}</span>#{I18n.t(o[:direction])}
+          </td>
+          <td style="#{style_border}\">#{o[:price]}</td>
+          <td style="#{style_border}\">#{o[:current_price]}</td>
+          <td style="#{style_border}\">#{o[:diff]}</td>
+          <td style="#{last ? 'border-radius: 0 0 8px 0;' : ''}#{style_border} border-right: 1px solid #caa9a9;">
+            #{o[:percent]}%</td>
+        </tr>
+      TEXT
     end
 
     templates = {

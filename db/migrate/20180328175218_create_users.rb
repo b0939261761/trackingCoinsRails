@@ -3,10 +3,10 @@ class CreateUsers < ActiveRecord::Migration[5.1]
     table_name = :users
 
     create_table table_name, comment: 'Пользователи' do |t|
-      t.string :username, default: '', null: false, comment: 'Имя пользователя'
-      t.string :email, default: '', null: false, comment: 'Почта'
-      t.string :password_digest, default: '', null: false, comment: 'Зашифрованный пароль'
-      t.string :refresh_token, default: '', null: false, comment: 'Refresh-токен'
+      t.string :username, limit: 30, default: '', null: false, comment: 'Имя пользователя'
+      t.string :email, limit: 100, default: '', null: false, comment: 'Почта'
+      t.string :password_digest, limit: 60, default: '', null: false, comment: 'Зашифрованный пароль'
+      t.string :refresh_token, limit: 124, default: '', null: false, comment: 'Refresh-токен'
       t.boolean :confirmed, default: false, null: false, comment: 'Подтверждение регистрации'
 
       t.datetime :created_at, null: false, default: -> { 'CURRENT_TIMESTAMP' }, comment: 'Дата создания записи'

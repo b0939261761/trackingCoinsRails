@@ -15,6 +15,10 @@ class User < ApplicationRecord
     token
   end
 
+  def telegram_full_name
+    "#{self.telegram_first_name} #{self.telegram_last_name}"
+  end
+
   private
 
   def encode_refresh_token

@@ -1,0 +1,8 @@
+ru:
+  exchange: 'Биржа'
+  pair: 'Валютная пара'
+  target_price: 'Целевая цена'
+  current_price: 'Текущая цена'
+  direction: 'Направление'
+  less: 'Меньше'
+  above: 'Больше'

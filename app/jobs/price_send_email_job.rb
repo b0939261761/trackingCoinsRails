@@ -1,4 +1,4 @@
-class PriceSendJob < ApplicationJob
+class PriceSendEmailJob < ApplicationJob
   include SendgridMailer
 
   queue_as :notifications

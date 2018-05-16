@@ -7,8 +7,5 @@
 # Ignore master key for decrypting credentials and more.
 /config/master.key
 
-.env
 /gems
 /db/schema.rb
-nginx.conf
-/site/letsencrypt/*

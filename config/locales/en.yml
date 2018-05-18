@@ -6,3 +6,13 @@ en:
   direction: 'Direction'
   less: 'Low'
   above: 'High'
+  register_done: 'Register done'
+  register_fail: 'Register fail'
+  more_infomation: 'You want to more information?'
+  go_to: 'Go to'
+  refresh_settings: 'Refresh settings'
+  settings: 'Settings'
+  saved: 'Saved'
+
+
+

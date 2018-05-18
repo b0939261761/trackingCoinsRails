@@ -22,3 +22,4 @@ gem 'bcrypt'
 gem 'passenger', require: "phusion_passenger/rack_handler"
 
 gem 'telegram-bot'
+gem 'telegram-bot-types'

@@ -14,7 +14,7 @@ module CheckNotifications
         get_notifications AS (
           UPDATE notifications SET
             sended = true
-              WHERE NOT sended AND done AND activated
+              WHERE done AND activated
               RETURNING *
         )
       -- Результирующий запрос

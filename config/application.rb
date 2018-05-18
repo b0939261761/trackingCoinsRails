@@ -24,5 +24,7 @@ module TrackingCoinsRails
 
     config.active_job.queue_adapter = :sidekiq
     config.autoload_paths << "#{Rails.root}/lib"
+
+    config.telegram_updates_controller.session_store = :redis_cache_store, { url: ENV['REDIS_URL_BOT'], expires_in: 1.month }
   end
 end

@@ -1,4 +1,4 @@
-redis = { url: ENV['REDIS_PROVIDER'] }
+redis = { url: ENV['REDIS_URL_QUEUE'] }
 
 Sidekiq.configure_server do |config|
   config.redis = redis

@@ -31,4 +31,6 @@ Rails.application.routes.draw do
   post :get_exchanges, controller: :api
   post :get_pairs, controller: :api
   post :get_notifications, controller: :api
+
+  post :get_currencies, controller: :api
 end

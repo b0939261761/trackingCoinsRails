@@ -9,8 +9,10 @@ module Binance
     data = JSON.parse(response, symbolize_names: true)
     pairs = []
     prices = []
+
     data.each_with_index do |trade, index|
-      symbol = trade[:symbol]
+      symbol = compare_currencies(currency: trade[:symbol])
+
       pairs << "(( SELECT id FROM exchange ), '#{symbol}')"
 
       prices << "(( SELECT id FROM pairs_new WHERE symbol='#{symbol}' ), " \
@@ -55,38 +57,25 @@ module Binance
             RETURNING id, pair_id, price
         )
        -- Сохраняем цену
-      UPDATE notifications SET
+      UPDATE notifications AS aa SET
         current_price = aa.price,
         sended = CASE
           WHEN
-            ( direction = 'above' AND current_price < notifications.price AND sended ) OR
- 	          ( direction = 'less' AND current_price > notifications.price AND sended ) THEN false
+            (direction = 'above' AND bb.price < aa.price) OR
+ 	          (direction = 'less' AND bb.price > aa.price) THEN false
           ELSE sended
           END,
         done = CASE
           WHEN
-            ( direction = 'above' AND current_price >= notifications.price AND NOT sended AND activated ) OR
-            ( direction = 'less' AND current_price <= notifications.price AND NOT sended AND activated ) THEN true
+            NOT sended AND activated AND
+            (( direction = 'above' AND bb.price >= aa.price ) OR
+            ( direction = 'less' AND bb.price <= aa.price )) THEN true
           ELSE false
           END
-        FROM prices_new aa
-        WHERE aa.pair_id = notifications.pair_id AND activated
+        FROM prices_new bb
+        WHERE aa.pair_id = bb.pair_id AND activated
     SQL
 
-    # -- Результирующий запрос
-    # SELECT aa.id AS exchange_id,
-    #       aa.name AS exchange_name,
-    #       bb.id AS pairs_id,
-    #       bb.symbol,
-    #       cc.id AS price_id,
-    #       cc.price
-    #   FROM exchange aa
-    #   LEFT JOIN pairs_new bb ON aa.id = bb.exchange_id
-    #   LEFT JOIN prices_new cc ON bb.id = cc.pair_id
-    #   LEFT JOIN notifications dd ON aa.id = dd.exchange_id
-    #       AND bb.id = dd.pair_id
-
     JSON.parse(ActiveRecord::Base.connection.execute(sql).to_json, symbolize_names: true)
-
   end
 end

@@ -53,9 +53,9 @@ module CheckNotifications
           price = o[:price].to_f
           {
             direction: o[:direction],
-            current_price: format_number(current_price),
-            price: format_number(price),
-            diff: format_number(current_price - price),
+            current_price: o[:current_price],
+            price: o[:price],
+            diff: '%0.8f' % (current_price - price),
             percent: format_number((current_price / price - 1) * 100, 3),
             currency: o[:currency],
             exchange: o[:exchange]

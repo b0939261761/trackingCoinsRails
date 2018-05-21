@@ -1,1 +1,4 @@
-p 'localhost:4000'.gsub('localhost', '127.0.0.1')
+dd = "0.083551".to_f
+dd2 = "0.083550".to_f
+
+p '%0.8f' % (dd - dd2)

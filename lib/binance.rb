@@ -58,7 +58,7 @@ module Binance
         )
        -- Сохраняем цену
       UPDATE notifications AS aa SET
-        current_price = aa.price,
+        current_price = bb.price,
         sended = CASE
           WHEN
             (direction = 'above' AND bb.price < aa.price) OR

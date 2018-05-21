@@ -24,7 +24,7 @@ module CheckNotifications
         bb.name AS exchange,
         aa.direction,
         aa.price,
-        aa.current_price as current_price,
+        aa.current_price,
         dd.username,
         dd.lang,
         dd.email_enabled,

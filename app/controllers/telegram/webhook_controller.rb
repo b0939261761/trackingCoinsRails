@@ -22,7 +22,7 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
 
   def help(*)
     url = ENV['WEB_URL'].gsub('localhost', '127.0.0.1')
-    button = Telegram::Bot::Types::InlineKeyboardButton.new(text: "#{I18n.t(:go_to)} Reality Coins", url: url)
+    button = Telegram::Bot::Types::InlineKeyboardButton.new(text: "#{I18n.t(:go_to)} Cryptonot", url: url)
     markup = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: [[button]]).to_hash
 
     respond_with :message, text: I18n.t(:more_infomation), reply_markup: markup

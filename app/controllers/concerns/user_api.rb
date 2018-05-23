@@ -6,11 +6,12 @@ module UserApi
     par = params.permit(:username, :email, :password, :lang, :email_enabled,
       :telegram_username, :telegram_enabled, :telegram_activated)
 
-    unless par[:telegram_activated] 
-      par.merge(telegram_first_name: '', telegram_last_name: '', telegram_chat_id: 0) 
+    unless par[:telegram_activated]
+      par.merge(telegram_first_name: '', telegram_last_name: '', telegram_chat_id: 0)
     end
 
-    user = User.update(user_id, par)
+    user = User.find(user_id)
+    user.update(par)
     render json: { user: user_for_api(user: user) }
   end
 

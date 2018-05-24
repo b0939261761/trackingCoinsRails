@@ -7,7 +7,6 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
   before_action :set_locale
 
   def test(*)
-
   end
 
   def message(data)

@@ -1,10 +1,28 @@
 # frozen_string_literal: true
 
 # Access to site
-module Yobit
+module Livecoin
+  def livecoin
+    url = URI('https://api.livecoin.net/exchange/ticker')
+    response = Net::HTTP.get(url)
 
-  def yobit_add_into_table(pairs:,prices:)
-    exchange_name = 'YObit'
+    data = JSON.parse(response, symbolize_names: true)
+    pairs = []
+    prices = []
+
+    data.each do |trade|
+      symbol = trade[:symbol]
+
+      pairs << "(( SELECT id FROM exchange ), '#{symbol}')"
+
+      prices << <<-SQL.squish
+        (( SELECT id FROM pairs_new WHERE symbol='#{symbol}' ),
+        #{trade[:last]},
+        '#{Time.new}')
+        SQL
+    end
+
+    exchange_name = 'Livecoin'
 
     sql = <<-SQL
       WITH
@@ -61,36 +79,5 @@ module Yobit
     SQL
 
     JSON.parse(ActiveRecord::Base.connection.execute(sql).to_json, symbolize_names: true)
-  end
-
-  def yobit
-    url_pairs = URI('https://yobit.net/api/3/info')
-    response_pairs = Net::HTTP.get(url_pairs)
-    data_pairs = JSON.parse(response_pairs, symbolize_names: true)
-
-    data_pairs[ :pairs ].each_slice(45) do |pairs_piece|
-      sleep 1
-      pairs_list = pairs_piece.map(&:first).join('-')
-      url_prices = URI("https://yobit.net/api/3/ticker/#{pairs_list}")
-      response_prices = Net::HTTP.get(url_prices)
-      data_prices = JSON.parse(response_prices, symbolize_names: true)
-
-      pairs = []
-      prices = []
-
-      data_prices.each do | pair, pair_data |
-        symbol = pair.to_s.upcase.sub('_', '/')
-
-        pairs << "(( SELECT id FROM exchange ), '#{symbol}')"
-
-        prices << <<-SQL.squish
-          (( SELECT id FROM pairs_new WHERE symbol='#{symbol}' ),
-            #{pair_data[:last]},
-            '#{Time.at(pair_data[:updated].to_i).to_s(:db)}')
-          SQL
-      end
-
-      yobit_add_into_table(pairs: pairs, prices: prices)
-    end
   end
 end

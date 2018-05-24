@@ -9,11 +9,11 @@ module Auth
   include Binance
   include Yobit
   include Hitbtc
-
-
+  include Livecoin
+  include Exmo
 
   def test
-    render json: { test: hitbtc }
+    # render json: { test: poloniex }
   end
 
   def root; end

@@ -1,3 +1,6 @@
 Exchange.create(name: 'Binance') unless Exchange.find_by(name: 'Binance')
 Exchange.create(name: 'YObit') unless Exchange.find_by(name: 'YObit')
 Exchange.create(name: 'HitBTC') unless Exchange.find_by(name: 'HitBTC')
+Exchange.create(name: 'Livecoin') unless Exchange.find_by(name: 'Livecoin')
+Exchange.create(name: 'Exmo') unless Exchange.find_by(name: 'Exmo')
+Exchange.create(name: 'Poloniex') unless Exchange.find_by(name: 'Poloniex')

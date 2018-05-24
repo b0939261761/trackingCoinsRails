@@ -5,11 +5,16 @@ class ExchangesGetPriceJob < ApplicationJob
   include CheckNotifications
   include Yobit
   include Hitbtc
+  include Livecoin
+  include Exmo
 
   def perform
-    binance
-    yobit
-    hitbtc
+    # binance
+    # hitbtc
+    # livecoin
+    # exmo
+
+    # yobit
     check_notifications
   end
 

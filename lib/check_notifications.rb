@@ -55,7 +55,7 @@ module CheckNotifications
             direction: o[:direction],
             current_price: o[:current_price],
             price: o[:price],
-            diff: '%0.8f' % (current_price - price),
+            diff: '%0.10f' % (current_price - price),
             percent: format_number((current_price / price - 1) * 100, 3),
             currency: o[:currency],
             exchange: o[:exchange]

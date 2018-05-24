@@ -11,7 +11,7 @@ module Yobit
     prices = []
 
     data_pairs[ :pairs ].each_slice(45) do |pairs_piece|
-      sleep 2
+      sleep 1
 
       pairs_list = pairs_piece.map(&:first).join('-')
       url_prices = URI("https://yobit.net/api/3/ticker/#{pairs_list}")

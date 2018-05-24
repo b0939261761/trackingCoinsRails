@@ -31,7 +31,7 @@ module Yobit
       end
     end
 
-    exchange_name = 'yobit'
+    exchange_name = 'YObit'
 
     sql = <<-SQL
       WITH

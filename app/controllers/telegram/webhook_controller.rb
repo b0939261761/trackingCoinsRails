@@ -1,13 +1,14 @@
 # frozen_string_literal: true
 
 class Telegram::WebhookController < Telegram::Bot::UpdatesController
-
   include Telegram::Bot::UpdatesController::CallbackQueryContext
-  # include Telegram::Bot::UpdatesController::TypedUpdate
 
   use_session!
   before_action :set_locale
 
+  def test(*)
+
+  end
 
   def message(data)
     case data['text']

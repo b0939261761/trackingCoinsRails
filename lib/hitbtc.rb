@@ -1,26 +1,31 @@
 # frozen_string_literal: true
 
 # Access to site
-module Binance
-  def binance
-    url = URI('https://api.binance.com/api/v1/ticker/24hr')
-    response = Net::HTTP.get(url)
+module Hitbtc
+  def hitbtc
+    url_prices = URI('https://api.hitbtc.com/api/2/public/ticker')
+    response_prices = Net::HTTP.get(url_prices)
+    data_prices = JSON.parse(response_prices, symbolize_names: true)
 
-    data = JSON.parse(response, symbolize_names: true)
+    url_pairs = URI('https://api.hitbtc.com/api/2/public/symbol')
+    response_pairs = Net::HTTP.get(url_pairs)
+    data_pairs = JSON.parse(response_pairs, symbolize_names: true)
+
     pairs = []
     prices = []
 
-    data.each_with_index do |trade, index|
-      symbol = compare_currencies(currency: trade[:symbol])
+    data_prices.each_with_index do |trade, index|
+      pair = data_pairs.find { | o | trade[:symbol] == o[:id] }
 
+      symbol = pair ? "#{pair[:baseCurrency]}/#{pair[:quoteCurrency]}" : trade[:symbol]
       pairs << "(( SELECT id FROM exchange ), '#{symbol}')"
 
       prices << "(( SELECT id FROM pairs_new WHERE symbol='#{symbol}' ), " \
-                "#{trade[:lastPrice]}," \
-                "'#{Time.at(trade[:closeTime].to_i/1000).to_s(:db)}')"
+                "#{trade[:last]}," \
+                "'#{trade[:timestamp]}')"
     end
 
-    exchange_name = 'Binance'
+    exchange_name = 'HitBTC'
 
     sql = <<-SQL
       WITH

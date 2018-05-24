@@ -4,10 +4,12 @@ class ExchangesGetPriceJob < ApplicationJob
   include Binance
   include CheckNotifications
   include Yobit
+  include Hitbtc
 
   def perform
     binance
     yobit
+    hitbtc
     check_notifications
   end
 

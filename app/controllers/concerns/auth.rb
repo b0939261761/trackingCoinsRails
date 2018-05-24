@@ -4,15 +4,16 @@
 module Auth
   include SendgridMailer
   include Coinmarketcap
+
   include CheckNotifications
   include Binance
   include Yobit
+  include Hitbtc
+
 
 
   def test
-
-
-    render json: { test: true }
+    render json: { test: hitbtc }
   end
 
   def root; end

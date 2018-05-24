@@ -6,6 +6,8 @@ class PriceSendTelegramJob < ApplicationJob
   def perform(chat_id:, prices:)
     bot = Telegram::Bot::Client.new(ENV['TELEGRAM_BOT_TOKEN'])
 
+    # max = I18n.t(:target_price)
+
     prices.each do |o|
       text = <<~TEXT
         *#{I18n.t(:pair)}*: `#{o[:currency]}`

@@ -1,2 +1,3 @@
 class Pair < ApplicationRecord
+
 end

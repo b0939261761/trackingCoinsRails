@@ -1,26 +1,26 @@
 # frozen_string_literal: true
 
-module Exmo
+module Bitsane
 
-  EXMO_NAME = 'Exmo'
-  EXMO_URL_PRICES = URI('https://api.exmo.com/v1/ticker/')
+  BITSANE_NAME = 'Bitsane'
+  BITSANE_URL_PRICES = URI('https://bitsane.com/api/public/ticker')
 
-  def exmo
-    response = Net::HTTP.get(EXMO_URL_PRICES)
+  def bitsane
+    response = Net::HTTP.get(BITSANE_URL_PRICES)
     data = JSON.parse(response, symbolize_names: true)
 
     pairs = []
     prices = []
+    close_time = Time.new
 
     data.each do |pair, pair_info|
       symbol = pair.to_s.gsub('_', '/')
-      close_time = Time.at(pair_info[:updated].to_i).to_s(:db)
-      price = pair_info[:last_trade]
+      price = pair_info[:last]
 
       pairs << sql_pairs(symbol:symbol)
       prices << sql_prices(symbol:symbol, price: price, close_time: close_time)
     end
 
-    insert_into_db(exchange_name: EXMO_NAME, pairs: pairs, prices: prices)
+    insert_into_db(exchange_name: BITSANE_NAME, pairs: pairs, prices: prices)
   end
 end

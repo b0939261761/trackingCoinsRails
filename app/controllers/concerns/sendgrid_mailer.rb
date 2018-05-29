@@ -12,7 +12,7 @@ module SendgridMailer
     'Content-Type': 'application/json'
   }.freeze
 
-  FROM_NAME = 'Rails Coins'
+  FROM_NAME = 'Cryptonot'
 
   def send_email(email_to:, template_id:, substitutions:)
     body = {

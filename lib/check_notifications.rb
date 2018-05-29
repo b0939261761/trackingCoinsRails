@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-# Access to site
 module CheckNotifications
 
   def format_number(value, precision = 8)

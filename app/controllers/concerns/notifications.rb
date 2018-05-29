@@ -1,6 +1,5 @@
 # frozen_string_literal: true
 
-#
 module Notifications
   def get_exchanges
     render json: { exchanges: Exchange.select(:id, :name) }
@@ -9,6 +8,21 @@ module Notifications
   def get_pairs
     render json: { pairs: Pair.select(:id, :symbol).where(exchange_id: params[:exchange_id])}
   end
+
+  # def get_exchanges
+  #   # symbol = params[:symbol]
+  #   symbol = 'BTC/USD'
+  #   exchanges = Exchange
+  #     .joins(:pairs)
+  #     .select(:id, :name)
+  #     .where(pairs: {symbol: symbol})
+
+  #   render json: { exchanges: exchanges}
+  # end
+
+  # def get_pairs
+  #   render json: { pairs: Pair.select(:id, :symbol).where(exchange_id: params[:exchange_id])}
+  # end
 
   def edit_notification
     if (id = params[:id].nonzero?)

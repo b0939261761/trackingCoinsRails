@@ -1,4 +1,4 @@
 exchanges_get_price_job:
-  cron: '*/4 * * * *'
+  cron: '*/1 * * * *'
   class: 'ExchangesGetPriceJob'
   queue: exchanges

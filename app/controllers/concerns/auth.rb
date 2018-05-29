@@ -1,19 +1,26 @@
 # frozen_string_literal: true
 
-# Access to site
 module Auth
   include SendgridMailer
   include Coinmarketcap
 
+
+  include AdditionalForExchanges
   include CheckNotifications
+
   include Binance
   include Yobit
   include Hitbtc
   include Livecoin
   include Exmo
+  include Bittrex
+  include Bitstamp
+  include Cex
+  include Bitsane
+  include Okcoin
 
   def test
-    # render json: { test: poloniex }
+    render json: { test: yobit }
   end
 
   def root; end
@@ -45,7 +52,7 @@ module Auth
     if user_by_email(email: email)
       status = 400, { error: 'FAIL_EMAIL_EXISTS' }
     else
-      par = params.permit(:username, :email, :password).merge(lang: current_lang)
+      par = params.permit(:username, :email, :password).merge(lang: current_lang, telegram_activated: false)
       user = User.create(par)
       if send_confirmation(user_id: user.id, email: email, lang: current_lang)
         user.destroy
@@ -152,6 +159,7 @@ module Auth
 
   def get_currencies
     render json: coinmarketcap
+    render json: yobit_pairs
   end
 
   private

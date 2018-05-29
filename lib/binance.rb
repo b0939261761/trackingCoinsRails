@@ -2,80 +2,26 @@
 
 # Access to site
 module Binance
-  def binance
-    url = URI('https://api.binance.com/api/v1/ticker/24hr')
-    response = Net::HTTP.get(url)
 
+  BINANCE_NAME = 'Binance'
+  BINANCE_URL_PRICES = URI('https://api.binance.com/api/v1/ticker/24hr')
+
+  def binance
+    response = Net::HTTP.get(BINANCE_URL_PRICES)
     data = JSON.parse(response, symbolize_names: true)
+
     pairs = []
     prices = []
 
-    data.each_with_index do |trade, index|
-      symbol = compare_currencies(currency: trade[:symbol])
+    data.each do |pair_info|
+      symbol = compare_currencies(currency: pair_info[:symbol])
+      close_time = Time.at(pair_info[:closeTime].to_i/1000).to_s(:db)
+      price = pair_info[:lastPrice]
 
-      pairs << "(( SELECT id FROM exchange ), '#{symbol}')"
-
-      prices << "(( SELECT id FROM pairs_new WHERE symbol='#{symbol}' ), " \
-                "#{trade[:lastPrice]}," \
-                "'#{Time.at(trade[:closeTime].to_i/1000).to_s(:db)}')"
+      pairs << sql_pairs(symbol:symbol)
+      prices << sql_prices(symbol:symbol, price: price, close_time: close_time)
     end
 
-    exchange_name = 'Binance'
-
-    sql = <<-SQL
-      WITH
-        -- Получаем обменник
-        exchange AS (
-          SELECT id, name FROM exchanges
-          WHERE name = '#{exchange_name}'
-          LIMIT 1
-        ),
-
-        -- Добавляем пары
-        pairs_new AS (
-          INSERT INTO pairs (
-            exchange_id,
-            symbol
-          )
-            VALUES
-              #{pairs.join(',')}
-            ON CONFLICT ( exchange_id, symbol )
-              DO UPDATE SET symbol = EXCLUDED.symbol
-            RETURNING id, exchange_id, symbol
-        ),
-        -- Добавляем цены
-        prices_new AS (
-          INSERT INTO prices (
-            pair_id,
-            price,
-            close_time
-          )
-            VALUES
-              #{prices.join(',')}
-            ON CONFLICT ( pair_id, close_time )
-              DO UPDATE SET price = EXCLUDED.price
-            RETURNING id, pair_id, price
-        )
-       -- Сохраняем цену
-      UPDATE notifications AS aa SET
-        current_price = bb.price,
-        sended = CASE
-          WHEN
-            (direction = 'above' AND bb.price < aa.price) OR
- 	          (direction = 'less' AND bb.price > aa.price) THEN false
-          ELSE sended
-          END,
-        done = CASE
-          WHEN
-            NOT sended AND activated AND
-            (( direction = 'above' AND bb.price >= aa.price ) OR
-            ( direction = 'less' AND bb.price <= aa.price )) THEN true
-          ELSE false
-          END
-        FROM prices_new bb
-        WHERE aa.pair_id = bb.pair_id AND activated
-    SQL
-
-    JSON.parse(ActiveRecord::Base.connection.execute(sql).to_json, symbolize_names: true)
+    insert_into_db(exchange_name: BINANCE_NAME, pairs: pairs, prices: prices)
   end
 end

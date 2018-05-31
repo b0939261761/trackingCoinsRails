@@ -3,13 +3,12 @@
 module Auth
   include SendgridMailer
   include Coinmarketcap
-
-
-  include AdditionalForExchanges
-  include CheckNotifications
-
-  include Binance
   include Yobit
+  include AdditionalForExchanges
+
+
+  include CheckNotifications
+  include Binance
   include Hitbtc
   include Livecoin
   include Exmo
@@ -19,8 +18,9 @@ module Auth
   include Bitsane
   include Okcoin
 
+
   def test
-    render json: { test: yobit }
+    
   end
 
   def root; end

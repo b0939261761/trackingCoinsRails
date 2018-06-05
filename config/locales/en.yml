@@ -15,5 +15,22 @@ en:
   saved: 'Saved'
   activate: 'Activate'
   help: 'Help'
+  add_notification: 'Add notification'
+  cancel: 'Cancel'
+  ask_enter_pair: 'Enter the currency pair in the format XXX/YYY'
+  ask_enter_exchange: 'Select at least one stock exchange and click <Next>'
+  ask_enter_direction: 'Select the direction for the price of the currency pair'
+  ask_enter_price: 'Enter the price of the currency pair and save the notice'
+  selected_exchanges: 'Selected exchanges'
+  selected_price: 'Selected price:'
+  notification_created: 'Notification created'
+  done: 'Done'
+  next: 'Next'
+  all_exchanges: 'All exchanges'
+  save: 'Save'
+
+
+
+
 
 

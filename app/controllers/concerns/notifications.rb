@@ -1,16 +1,10 @@
 # frozen_string_literal: true
 
 module Notifications
+  include NotificationsAdditional
 
   def get_exchanges
-    symbol = params[:symbol]
-    exchanges = Exchange
-      .joins(:pairs)
-      .select(:id, :name)
-      .where(pairs: {symbol: symbol})
-      .order(:name)
-
-    render json: { exchanges: exchanges}
+    render json: { exchanges: exchanges_by_pair(symbol: params[:symbol])}
   end
 
   def get_pairs
@@ -21,7 +15,9 @@ module Notifications
     par = params.permit(:symbol, :direction, :price, :activated)
 
     values = []
-    params[:exchange_ids].each { |id| values << notifications_sql_value(par.merge(exchange_id: id))}
+    params[:exchange_ids].each do |id| 
+      values << notifications_sql_value(par.merge(user_id: user_id, exchange_id: id))
+    end
 
     notifications_sql_insert(values: values, ids: params[:ids])
 
@@ -74,56 +70,5 @@ module Notifications
       end
 
     result
-  end
-
-  def notifications_sql_value(args)
-    <<-SQL.squish
-      (
-        #{user_id},
-        #{args[:exchange_id]},
-        (SELECT id FROM pairs WHERE symbol = '#{args[:symbol]}' AND exchange_id = #{args[:exchange_id]}),
-        '#{args[:direction]}',
-        #{args[:price]},
-        #{args[:activated]}
-      )
-    SQL
-  end
-
-  def notifications_sql_insert(values:, ids:)
-
-    sql = if ids.length
-      <<-SQL
-        WITH
-          notifications_del AS (
-            DELETE FROM notifications aa
-              USING (
-                SELECT id
-                  FROM UNNEST( ARRAY #{ids} ) AS id
-              ) bb
-              WHERE aa.id = bb.id
-          )
-      SQL
-    end
-
-    sql += <<-SQL
-      INSERT INTO notifications (
-        user_id,
-        exchange_id,
-        pair_id,
-        direction,
-        price,
-        activated
-      )
-        VALUES
-          #{values.join(',')}
-        ON CONFLICT ( user_id, pair_id, direction, price )
-          DO UPDATE SET
-            direction = EXCLUDED.direction,
-            activated = EXCLUDED.activated,
-            sended = false
-    SQL
-
-
-    JSON.parse(ActiveRecord::Base.connection.execute(sql).to_json, symbolize_names: true)
   end
 end

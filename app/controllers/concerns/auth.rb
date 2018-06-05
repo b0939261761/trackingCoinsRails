@@ -20,7 +20,7 @@ module Auth
 
 
   def test
-    
+
   end
 
   def root; end

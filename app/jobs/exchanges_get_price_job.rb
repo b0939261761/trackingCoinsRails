@@ -15,7 +15,6 @@ class ExchangesGetPriceJob < ApplicationJob
   include Bitsane
   include Okcoin
 
-
   def perform
     binance
     hitbtc

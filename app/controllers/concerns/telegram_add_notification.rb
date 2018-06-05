@@ -1,14 +1,6 @@
 # frozen_string_literal: true
 
-class Telegram::WebhookController < Telegram::Bot::UpdatesController
-  include Telegram::Bot::UpdatesController::CallbackQueryContext
-  include Telegram::Bot::UpdatesController::MessageContext
-  include NotificationsAdditional
-
-  use_session!
-  context_to_action!
-  before_action :set_locale
-
+module TelegramAddNotification
   def new_currency_pair
     markup = setup_button([[button_cancel_title]])
     respond_with :message, text: I18n.t(:ask_enter_pair), reply_markup: markup
@@ -131,7 +123,7 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
     elsif response == button_save_title
       sql_new_exchanges = [ ]
       values_for_sql = {
-        user_id: session[:user_id],
+        user_id: user_id,
         symbol: session[:new_currency_pair],
         direction: session[:new_direction],
         price: session[:new_price],
@@ -142,7 +134,7 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
         sql_new_exchanges << notifications_sql_value(values_for_sql.merge(exchange_id: o[:id]))
       end
 
-      notifications_sql_insert(values: sql_new_exchanges, ids: [0])
+      notifications_sql_insert(values: values, ids: [])
 
       clear_add_notification
       respond_with :message, text: "✔️ #{I18n.t(:notification_created)}", reply_markup: main_keyboard
@@ -155,150 +147,7 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
     new_price
   end
 
-  def test(*)
-  end
-
-  def message(data)
-    case data['text']
-    when button_activate_title
-      activate
-    when button_refresh_settings_title
-      refresh_settings
-    when button_help_title
-      help
-    when button_add_notification_title
-      clear_add_notification
-      new_currency_pair
-    when button_cancel_title
-      respond_with :message, text: I18n.t(:done), reply_markup: main_keyboard
-    end
-  end
-
-  def help(*)
-    url = ENV['WEB_URL'].gsub('localhost', '127.0.0.1')
-    button = Telegram::Bot::Types::InlineKeyboardButton.new(text: "#{I18n.t(:go_to)} Cryptonot", url: url)
-    markup = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: [[button]]).to_hash
-
-    respond_with :message, text: I18n.t(:more_infomation), reply_markup: markup
-  end
-
-  def activate(*)
-    markup = refresh_all_settings
-
-    text = I18n.t(:register_fail)
-
-    if user &&
-      user.update(telegram_chat_id: from['id'],
-                  telegram_first_name: from['first_name'] || '',
-                  telegram_last_name: from['last_name'] || '',
-                  telegram_activated: true)
-      text = I18n.t(:register_done)
-    end
-
-    respond_with :message, text: text, reply_markup: markup
-  end
-
-  def start(*)
-    activate
-  end
-
-  def refresh_settings(*)
-    markup = refresh_all_settings
-    respond_with :message, text: I18n.t(:saved), reply_markup: markup
-  end
-
   private
 
-  def clear_add_notification
-    session.delete(:new_currency_pair)
-    session.delete(:exchanges_list)
-    session.delete(:new_exchanges)
-    session.delete(:new_direction)
-    session.delete(:new_price)
-  end
-
-  def exchanges(symbol:)
-    @exchanges ||= JSON.parse(exchanges_by_pair(symbol: symbol).to_json, symbolize_names: true)
-  end
-
-  def button_save_title
-    "💾 #{I18n.t(:save)}"
-  end
-
-  def button_less_title
-    "⬇️ #{I18n.t(:less)}"
-  end
-
-  def button_above_title
-    "⬆️ #{I18n.t(:above)}"
-  end
-
-  def button_activate_title
-    "☑️ #{I18n.t(:activate)}"
-  end
-
-
-  def button_refresh_settings_title
-    "🔄 #{I18n.t(:refresh_settings)}"
-  end
-
-  def button_help_title
-    "ℹ️ #{I18n.t(:help)}"
-  end
-
-  def button_add_notification_title
-    "➕ #{I18n.t(:add_notification)}"
-  end
-
-  def button_cancel_title
-    "❌ #{I18n.t(:cancel)}"
-  end
-
-  def button_next_title
-    "▶️ #{I18n.t(:next)}"
-  end
-
-  def button_all_exchanges_title
-    "📃 #{I18n.t(:all_exchanges)}"
-  end
-
-  def refresh_all_settings
-    session.delete(:lang)
-    session.delete(:user_id)
-    clear_add_notification
-    @user = nil
-    set_locale
-    main_keyboard
-  end
-
-  def button_cancel_click
-    clear_add_notification
-    respond_with :message, text: I18n.t(:done), reply_markup: main_keyboard
-  end
-
-  def main_keyboard
-    setup_button([[button_activate_title, button_refresh_settings_title],
-                 [button_add_notification_title, button_help_title]])
-  end
-
-  def setup_button(buttons)
-    Telegram::Bot::Types::ReplyKeyboardMarkup.new(keyboard: buttons, resize_keyboard: true, one_time_keyboard: true).to_hash
-  end
-
-  def session_key
-    "#{bot.username}:#{chat['id']}:#{from['id']}" if chat && from
-  end
-
-  def set_locale
-    I18n.locale = lang
-  end
-
-  def user
-    @user ||= User.find_by(telegram_username: from['username'])
-  end
-
-  def lang
-    session[:user_id] ||= user.id
-    session[:lang] ||= user.lang
-  end
+  
 end

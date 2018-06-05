@@ -20,7 +20,7 @@ module Auth
 
 
   def test
-
+    render json: { check: true }
   end
 
   def root; end

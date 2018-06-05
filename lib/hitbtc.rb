@@ -21,7 +21,7 @@ module Hitbtc
 
       symbol = pair ? "#{pair[:baseCurrency]}/#{pair[:quoteCurrency]}" : pair_info[:symbol]
       close_time = pair_info[:timestamp]
-      price = pair_info[:last]
+      price = pair_info[:last] || 0
 
       pairs << sql_pairs(symbol:symbol)
       prices << sql_prices(symbol:symbol, price: price, close_time: close_time)

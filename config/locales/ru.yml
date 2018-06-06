@@ -28,3 +28,5 @@ ru:
   next: 'Далее'
   all_exchanges: 'Все биржи'
   save: 'Сохранить'
+  disable_notification: 'Отключить уведомление'
+  remove_notification: 'Удалить уведомление'

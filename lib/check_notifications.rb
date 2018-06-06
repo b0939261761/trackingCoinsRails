@@ -18,6 +18,7 @@ module CheckNotifications
         )
       -- Результирующий запрос
       SELECT
+        aa.id as notification_id,
         dd.email,
         cc.symbol as currency,
         bb.name AS exchange,
@@ -57,7 +58,8 @@ module CheckNotifications
             diff: '%0.10f' % (current_price - price),
             percent: format_number((current_price / price - 1) * 100, 3),
             currency: o[:currency],
-            exchange: o[:exchange]
+            exchange: o[:exchange],
+            notification_id: o[:notification_id]
           }
         end
 

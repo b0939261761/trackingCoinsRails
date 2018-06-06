@@ -15,7 +15,6 @@ module Cex
 
     data_pairs[:data][:pairs].uniq{ |o| o[:symbol2] }.each do |pair|
       url_prices = URI("#{CEX_URL_PRICES}/#{pair[:symbol2]}")
-      p url_prices
       response_prices = Net::HTTP.get(url_prices)
       data_prices = JSON.parse(response_prices, symbolize_names: true)
 

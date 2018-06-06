@@ -28,9 +28,5 @@ en:
   next: 'Next'
   all_exchanges: 'All exchanges'
   save: 'Save'
-
-
-
-
-
-
+  disable_notification: 'Disable notification'
+  remove_notification: 'Remove notification'

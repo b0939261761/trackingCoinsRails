@@ -15,11 +15,12 @@ module Hitbtc
 
     pairs = []
     prices = []
-
+    
     data_prices.each do |pair_info|
       pair = data_pairs.find { |o| pair_info[:symbol] == o[:id] }
 
       symbol = pair ? "#{pair[:baseCurrency]}/#{pair[:quoteCurrency]}" : pair_info[:symbol]
+
       close_time = pair_info[:timestamp]
       price = pair_info[:last] || 0
 

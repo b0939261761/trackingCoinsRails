@@ -74,7 +74,7 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
     if exchange
       new_exchanges_list = exchanges_list - exchange
 
-      if new_exchanges_list.length
+      if new_exchanges_list.any?
         session[:exchanges_list] = new_exchanges_list
         session[:new_exchanges] += exchange
       else
@@ -172,6 +172,16 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
     when button_cancel_title
       respond_with :message, text: I18n.t(:done), reply_markup: main_keyboard
     end
+  end
+
+  def disable_notification_callback_query(id, *)
+    Notification.where(id: id).update_all(activated: false)
+    answer_callback_query(I18n.t(:done))
+  end
+
+  def remove_notification_callback_query(id, *)
+    Notification.where(id: id).delete_all
+    answer_callback_query(I18n.t(:done))
   end
 
   def help(*)

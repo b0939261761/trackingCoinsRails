@@ -64,9 +64,6 @@ GEM
     erubi (1.7.1)
     et-orbi (1.1.2)
       tzinfo
-    fugit (1.1.1)
-      et-orbi (~> 1.1, >= 1.1.1)
-      raabro (~> 1.1)
     globalid (0.4.1)
       activesupport (>= 4.2.0)
     httpclient (2.8.3)
@@ -98,7 +95,6 @@ GEM
       rake (>= 0.8.1)
     pg (1.0.0)
     pg (1.0.0-x64-mingw32)
-    raabro (1.1.5)
     rack (2.0.5)
     rack-cors (1.0.2)
     rack-protection (2.0.2)
@@ -131,8 +127,8 @@ GEM
       thor (>= 0.18.1, < 2.0)
     rake (12.3.1)
     redis (4.0.1)
-    rufus-scheduler (3.5.0)
-      fugit (~> 1.1, >= 1.1.1)
+    rufus-scheduler (3.4.2)
+      et-orbi (~> 1.0)
     sidekiq (5.1.3)
       concurrent-ruby (~> 1.0)
       connection_pool (~> 2.2, >= 2.2.0)
@@ -182,6 +178,7 @@ DEPENDENCIES
   pg
   rack-cors
   rails (~> 5.2.0)
+  rufus-scheduler (~> 3.4.2)
   sidekiq
   sidekiq-cron
   telegram-bot

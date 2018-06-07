@@ -17,9 +17,11 @@ gem 'tzinfo-data', platforms: [:mingw, :mswin, :x64_mingw, :jruby]
 
 gem 'sidekiq'
 gem 'sidekiq-cron'
+gem 'rufus-scheduler', '~> 3.4.2'
 
 gem 'bcrypt'
 gem 'passenger', require: "phusion_passenger/rack_handler"
 
 gem 'telegram-bot'
 gem 'telegram-bot-types'
+

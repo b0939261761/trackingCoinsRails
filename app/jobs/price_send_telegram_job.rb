@@ -6,11 +6,6 @@ class PriceSendTelegramJob < ApplicationJob
   def perform(chat_id:, prices:)
     bot = Telegram::Bot::Client.new(ENV['TELEGRAM_BOT_TOKEN'])
 
-
-    notification_id = 3
-
-    text = 'test'
-
     url = ENV['WEB_URL'].gsub('localhost', '127.0.0.1')
     button = Telegram::Bot::Types::InlineKeyboardButton.new(text: "#{I18n.t(:go_to)} Cryptonot", url: url)
     markup = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: [[button]]).to_hash

@@ -30,3 +30,6 @@ ru:
   save: 'Сохранить'
   disable_notification: 'Отключить уведомление'
   remove_notification: 'Удалить уведомление'
+  enable_notification: 'Включить уведомление'
+  create_notification: 'Создать уведомление'
+  error: 'Ошибка'

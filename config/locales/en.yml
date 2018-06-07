@@ -30,3 +30,6 @@ en:
   save: 'Save'
   disable_notification: 'Disable notification'
   remove_notification: 'Remove notification'
+  enable_notification: 'Enable notification'
+  create_notification: 'Create notification'
+  error: 'Error'

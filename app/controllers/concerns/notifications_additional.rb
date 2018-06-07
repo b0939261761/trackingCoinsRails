@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module NotificationsAdditional
- 
+
   private
 
   def notifications_sql_value(args)

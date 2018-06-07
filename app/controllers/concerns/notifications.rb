@@ -15,7 +15,7 @@ module Notifications
     par = params.permit(:symbol, :direction, :price, :activated)
 
     values = []
-    params[:exchange_ids].each do |id| 
+    params[:exchange_ids].each do |id|
       values << notifications_sql_value(par.merge(user_id: user_id, exchange_id: id))
     end
 

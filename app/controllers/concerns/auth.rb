@@ -20,21 +20,7 @@ module Auth
 
 
   def test
-    # bot = Telegram::Bot::Client.new(ENV['TELEGRAM_BOT_TOKEN'])
-
-    # notification_id = 3
-    # button_disable = Telegram::Bot::Types::InlineKeyboardButton.new(url: '',
-    #   text: "🔕 #{I18n.t(:disable_notification)}", callback_data: "disable_notification:#{notification_id}")
-    # button_remove = Telegram::Bot::Types::InlineKeyboardButton.new(url: '',
-    #   text: "🗑 #{I18n.t(:remove_notification)}", callback_data: "remove_notification:#{notification_id}")
-    # markup = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: [[button_disable, button_remove]]).to_hash
-
-    # text = 'test'
-    # chat_id = User.find_by( email: 'b360124@gmail.com').telegram_chat_id
-    # bot.send_message(chat_id: chat_id, text: text, parse_mode: 'Markdown', reply_markup: markup)
-
-
-    render json: { check: hitbtc }
+    render json: { check: true }
   end
 
   def root; end

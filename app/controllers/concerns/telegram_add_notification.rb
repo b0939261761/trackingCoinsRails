@@ -1,32 +1,125 @@
 # frozen_string_literal: true
 
 module TelegramAddNotification
+  extend ActiveSupport::Concern
 
-  def new_currency_pair(*args)
-    response = args&.join(' ')
 
-    if response == button_cancel_title
-      button_cancel_click
-      return
-    end
+  included do
+    context_handler :new_currency_pair do |*args|
+      response = args&.join(' ')
 
-    symbol = response.upcase
-
-    if symbol.include?('/')
-      exchanges_list = exchanges(symbol: symbol)
-
-      if exchanges_list.present?
-        session[:new_currency_pair] = symbol
-        session[:exchanges_list] = exchanges_list
-        session[:new_exchanges] = []
-        new_exchanges
+      if response == button_cancel_title
+        button_cancel_click
         return
       end
+
+      symbol = response.upcase
+
+      if symbol.include?('/')
+        exchanges_list = exchanges(symbol: symbol)
+
+        if exchanges_list.present?
+          session[:new_currency_pair] = symbol
+          session[:exchanges_list] = exchanges_list
+          session[:new_exchanges] = []
+          new_exchanges
+          return
+        end
+      end
+
+      new_currency_pair
     end
 
-    save_context :new_currency_pair
+    context_handler :new_exchanges do |*args|
+      response = args&.join(' ')
+
+      if response == button_cancel_title
+        button_cancel_click
+        return
+      elsif response == button_all_exchanges_title
+        session[:new_exchanges] += session[:exchanges_list]
+        new_direction
+        return
+      elsif response == button_next_title
+        new_direction
+        return
+      end
+
+      exchanges_list = session[:exchanges_list]
+      exchange = exchanges_list.select { |o| o[:name].upcase == response.upcase }
+
+      if exchange
+        new_exchanges_list = exchanges_list - exchange
+
+        if new_exchanges_list.any?
+          session[:exchanges_list] = new_exchanges_list
+          session[:new_exchanges] += exchange
+        else
+          new_direction
+          return
+        end
+      end
+
+      new_exchanges
+    end
+
+    context_handler :new_direction do |*args|
+      response = args&.join(' ')
+
+      if response == button_cancel_title
+        button_cancel_click
+        return
+      elsif response == button_less_title
+        session[:new_direction] = 'less'
+        new_price
+        return
+      elsif response == button_above_title
+        session[:new_direction] = 'above'
+        new_price
+        return
+      end
+
+      new_direction
+    end
+
+    context_handler :new_price do |*args|
+      response = args&.join(' ')
+
+      if response == button_cancel_title
+        button_cancel_click
+        return
+      elsif response == button_save_title
+        sql_new_exchanges = [ ]
+        values_for_sql = {
+          user_id: session[:user_id],
+          symbol: session[:new_currency_pair],
+          direction: session[:new_direction],
+          price: session[:new_price],
+          activated: true
+        }
+
+        session[:new_exchanges].each do |o|
+          sql_new_exchanges << notifications_sql_value(values_for_sql.merge(exchange_id: o[:id]))
+        end
+
+        notifications_sql_insert(values: sql_new_exchanges, ids: [0])
+
+        clear_add_notification
+        respond_with :message, text: "✔️ #{I18n.t(:notification_created)}", reply_markup: main_keyboard
+        return
+      end
+
+      price = ('%0.10f' % args[0].to_f).to_f
+      session[:new_price] = price if price.nonzero?
+
+      new_price
+    end
+  end
+
+  def new_currency_pair
     markup = setup_button([[button_cancel_title]])
     respond_with :message, text: I18n.t(:ask_enter_pair), reply_markup: markup
+    save_context :new_currency_pair
   end
 
   def new_exchanges
@@ -39,65 +132,13 @@ module TelegramAddNotification
         ? "*#{I18n.t(:selected_exchanges)}* `#{session[:new_exchanges].map{ |o| o[:name] }.join(', ')}`" \
         : '')
     respond_with :message, text: text, reply_markup: markup, parse_mode: 'Markdown'
-    save_context :new_exchanges!
-  end
-
-  def new_exchanges!(*args)
-    response = args&.join(' ')
-
-    if response == button_cancel_title
-      button_cancel_click
-      return
-    elsif response == button_all_exchanges_title
-      session[:new_exchanges] += session[:exchanges_list]
-      new_direction
-      return
-    elsif response == button_next_title
-      new_direction
-      return
-    end
-
-    exchanges_list = session[:exchanges_list]
-    exchange = exchanges_list.select { |o| o[:name].upcase == response.upcase }
-
-    if exchange
-      new_exchanges_list = exchanges_list - exchange
-
-      if new_exchanges_list.length
-        session[:exchanges_list] = new_exchanges_list
-        session[:new_exchanges] += exchange
-      else
-        new_direction
-        return
-      end
-    end
-
-    new_exchanges
+    save_context :new_exchanges
   end
 
   def new_direction
     markup = setup_button([[button_less_title, button_above_title], [button_cancel_title]])
     respond_with :message, text: I18n.t(:ask_enter_direction), reply_markup: markup
-    save_context :new_direction!
-  end
-
-  def new_direction(*args)
-    response = args&.join(' ')
-
-    if response == button_cancel_title
-      button_cancel_click
-      return
-    elsif response == button_less_title
-      session[:new_direction] = 'less'
-      new_price
-      return
-    elsif response == button_above_title
-      session[:new_direction] = 'above'
-      new_price
-      return
-    end
-
-    new_direction
+    save_context :new_direction
   end
 
   def new_price
@@ -108,39 +149,36 @@ module TelegramAddNotification
         ? "*#{I18n.t(:selected_price)}* `#{'%0.10f' % session[:new_price]}`" \
         : '')
     respond_with :message, text: text, reply_markup: markup, parse_mode: 'Markdown'
-    save_context :new_price!
+    save_context :new_price
   end
 
-  def new_price!(*args)
-    response = args&.join(' ')
+  private
 
-    if response == button_cancel_title
-      button_cancel_click
-      return
-    elsif response == button_save_title
-      sql_new_exchanges = [ ]
-      values_for_sql = {
-        user_id: session[:user_id],
-        symbol: session[:new_currency_pair],
-        direction: session[:new_direction],
-        price: session[:new_price],
-        activated: true
-      }
+  def clear_add_notification
+    session.delete(:new_currency_pair)
+    session.delete(:exchanges_list)
+    session.delete(:new_exchanges)
+    session.delete(:new_direction)
+    session.delete(:new_price)
+  end
 
-      session[:new_exchanges].each do |o|
-        sql_new_exchanges << notifications_sql_value(values_for_sql.merge(exchange_id: o[:id]))
-      end
+  def exchanges(symbol:)
+    @exchanges ||= JSON.parse(exchanges_by_pair(symbol: symbol).to_json, symbolize_names: true)
+  end
 
-      notifications_sql_insert(values: sql_new_exchanges, ids: [0])
+  def button_all_exchanges_title
+    "📃 #{I18n.t(:all_exchanges)}"
+  end
 
-      clear_add_notification
-      respond_with :message, text: "✔️ #{I18n.t(:notification_created)}", reply_markup: main_keyboard
-      return
-    end
+  def button_save_title
+    "💾 #{I18n.t(:save)}"
+  end
 
-    price = ('%0.10f' % args[0].to_f).to_f
-    session[:new_price] = price if price.nonzero?
+  def button_less_title
+    "⬇️ #{I18n.t(:less)}"
+  end
 
-    new_price
+  def button_above_title
+    "⬆️ #{I18n.t(:above)}"
   end
 end

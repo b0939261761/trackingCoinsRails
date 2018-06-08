@@ -57,7 +57,7 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
   end
 
   def start!
-    activate
+    activate!
   end
 
   private

@@ -1,1 +1,3 @@
-p "First:231\nSecond: some_text\nThirth: 88".scan(/(?<=:).+(?=\s*$)/).map(&:strip)
+from = {}
+
+p from['language_code']&.downcase&.include?('ru') ? 'ru' : 'en'

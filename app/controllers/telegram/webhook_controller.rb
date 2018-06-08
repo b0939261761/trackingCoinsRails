@@ -137,7 +137,10 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
       session[:user_id] ||= user.id
       session[:lang] ||= user.lang
     else
-      session[:lang] = from['language_code'].downcase.include?('ru') ? 'ru' : 'en'
+
+      session[:lang] = from['language_code']&.downcase&.include?('ru') ? 'ru' : 'en'
     end
   end
 end
+
+

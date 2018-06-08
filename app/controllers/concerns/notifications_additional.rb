@@ -26,6 +26,7 @@ module NotificationsAdditional
   end
 
   def notifications_sql_insert(values:, ids:)
+    ids = ids.any? ? ids : [0]
 
     sql = if ids.length
       <<-SQL

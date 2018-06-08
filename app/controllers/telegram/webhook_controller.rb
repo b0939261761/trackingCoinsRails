@@ -8,20 +8,19 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
   include TelegramChangeNotification
 
   use_session!
-  context_to_action!
   before_action :set_locale
 
-  def test(*)
+  def test!(*)
   end
 
   def message(data)
     case data['text']
     when button_activate_title
-      activate
+      activate!
     when button_refresh_settings_title
       refresh_settings
     when button_help_title
-      help
+      help!
     when button_add_notification_title
       clear_add_notification
       new_currency_pair
@@ -30,7 +29,7 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
     end
   end
 
-  def help(*)
+  def help!
     url = ENV['WEB_URL'].gsub('localhost', '127.0.0.1')
     button = Telegram::Bot::Types::InlineKeyboardButton.new(text: "#{I18n.t(:go_to)} Cryptonot", url: url)
     markup = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: [[button]]).to_hash
@@ -38,7 +37,7 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
     respond_with :message, text: I18n.t(:more_infomation), reply_markup: markup
   end
 
-  def activate(*)
+  def activate!
     refresh_all_settings
 
     text = I18n.t(:register_fail)
@@ -57,16 +56,16 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
     respond_with :message, text: text, reply_markup: markup
   end
 
-  def start(*)
+  def start!
     activate
   end
 
-  def refresh_settings(*)
+  private
+
+  def refresh_settings
     refresh_all_settings
     respond_with :message, text: I18n.t(:saved), reply_markup: main_keyboard
   end
-
-  private
 
   def button_activate_title
     "☑️ #{I18n.t(:activate)}"

@@ -32,7 +32,8 @@ class ApiController < ApplicationController
 
   def user_for_api(user:)
     user
-      .slice(:username, :email, :lang, :email_enabled,
+      .slice(:username, :email, :lang,
+        :email_enabled, :email_activated,
         :telegram_username, :telegram_enabled, :telegram_activated)
       .merge(telegram_full_name: user.telegram_full_name)
   end

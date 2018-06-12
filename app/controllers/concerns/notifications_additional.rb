@@ -4,6 +4,44 @@ module NotificationsAdditional
 
   private
 
+
+  def notifications(user_id:)
+    notifications = Notification
+      .joins( :exchange, :pair )
+      .select(
+        :id,
+        :exchange_id,
+        'exchanges.name AS exchange_name',
+        'pairs.symbol',
+        :direction,
+        :price,
+        :activated
+      )
+      .where(user_id: user_id)
+      .order( 'pairs.symbol', :direction, :price, 'exchange_name' )
+
+    result = []
+
+    notifications
+      .group_by{ |o| { symbol: o[:symbol], price: o[:price], direction: o[:direction], activated: o[:activated] } }
+      .each do |k,v|
+
+        ids = []
+        exchange_ids = []
+        exchange_names = []
+
+        v.each do |exchange|
+          ids << exchange[:id]
+          exchange_ids << exchange[:exchange_id]
+          exchange_names << exchange[:exchange_name]
+        end
+
+        result << k.merge({ids: ids, exchange_ids: exchange_ids, exchange_names: exchange_names})
+      end
+
+    result
+  end
+
   def notifications_sql_value(args)
     <<-SQL.squish
       (

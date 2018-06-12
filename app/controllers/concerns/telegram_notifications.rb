@@ -1,6 +1,43 @@
 # frozen_string_literal: true
 
-module TelegramAddNotification
+module TelegramNotifications
+
+  def notifications!(*args)
+    case args&.join(' ')
+    when button_cancel_title
+      button_cancel_click
+      return
+    when button_my_notifications_title
+      my_notifications
+      return
+    when button_add_notification_title
+      clear_add_notification
+      new_currency_pair
+      return
+    end
+
+    markup = setup_button([[button_my_notifications_title, button_add_notification_title],
+                           [button_cancel_title]])
+
+    respond_with :message, text: I18n.t(:selected_notifications), reply_markup: markup
+    save_context :notifications!
+  end
+
+  def my_notifications
+    text = ''
+
+    notifications(user_id: session[:user_id]).each do | o |
+      text += \
+        "*#{o[:symbol]}* " \
+        "#{o[:exchange_names].join(', ')} " \
+        "#{o[:direction] == 'less' ? '⬇️' : '️️️⬆️'} " \
+        "`#{'%0.10f' % o[:price].to_f}` " \
+        "#{o[:activated] ? '🔔' : '🔕'}\n"
+    end
+
+    respond_with :message, text: text, reply_markup: main_keyboard, parse_mode: 'Markdown'
+  end
+
   def new_currency_pair(*args)
     response = args&.join(' ')
 
@@ -31,14 +68,15 @@ module TelegramAddNotification
   def new_exchanges(*args)
     response = args&.join(' ')
 
-    if response == button_cancel_title
+    case response
+    when button_cancel_title
       button_cancel_click
       return
-    elsif response == button_all_exchanges_title
+    when button_all_exchanges_title
       session[:new_exchanges] += session[:exchanges_list]
       new_direction
       return
-    elsif response == button_next_title
+    when button_next_title
       new_direction
       return
     end
@@ -46,14 +84,14 @@ module TelegramAddNotification
     exchanges_list = session[:exchanges_list]
     exchange = exchanges_list.select { |o| o[:name].upcase == response.upcase }
 
-    if exchange
+    if exchange.any?
       new_exchanges_list = exchanges_list - exchange
 
-      if new_exchanges_list.any?
-        session[:exchanges_list] = new_exchanges_list
-        session[:new_exchanges] += exchange
-      else
-        # new_direction
+      session[:exchanges_list] = new_exchanges_list
+      session[:new_exchanges] += exchange
+
+      unless new_exchanges_list.any?
+        new_direction
         return
       end
     end
@@ -73,14 +111,15 @@ module TelegramAddNotification
   def new_direction(*args)
     response = args&.join(' ')
 
-    if response == button_cancel_title
+    case response
+    when button_cancel_title
       button_cancel_click
       return
-    elsif response == button_less_title
+    when button_less_title
       session[:new_direction] = 'less'
       new_price
       return
-    elsif response == button_above_title
+    when button_above_title
       session[:new_direction] = 'above'
       new_price
       return
@@ -94,10 +133,11 @@ module TelegramAddNotification
   def new_price(*args)
     response = args&.join(' ')
 
-    if response == button_cancel_title
+    case response
+    when button_cancel_title
       button_cancel_click
       return
-    elsif response == button_save_title
+    when button_save_title
       sql_new_exchanges = [ ]
       values_for_sql = {
         user_id: session[:user_id],
@@ -141,16 +181,20 @@ module TelegramAddNotification
     session.delete(:new_price)
   end
 
+  def button_add_notification_title
+    "➕ #{I18n.t(:add_notification)}"
+  end
+
+  def button_my_notifications_title
+    "📋 #{I18n.t(:my_notifications)}"
+  end
+
   def exchanges(symbol:)
     @exchanges ||= JSON.parse(exchanges_by_pair(symbol: symbol).to_json, symbolize_names: true)
   end
 
   def button_all_exchanges_title
     "📃 #{I18n.t(:all_exchanges)}"
-  end
-
-  def button_save_title
-    "💾 #{I18n.t(:save)}"
   end
 
   def button_less_title

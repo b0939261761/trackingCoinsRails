@@ -4,7 +4,9 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
   include Telegram::Bot::UpdatesController::CallbackQueryContext
   include Telegram::Bot::UpdatesController::MessageContext
   include NotificationsAdditional
-  include TelegramAddNotification
+  include TelegramNotifications
+  include TelegramSettings
+  include TelegramActivate
   include TelegramChangeNotification
 
   use_session!
@@ -15,15 +17,16 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
 
   def message(data)
     case data['text']
+    when button_notifications_title
+      notifications!
+    when button_exchange_rates_title
+      respond_with :message, text: 'В разработке', reply_markup: main_keyboard
+    when button_settings_title
+      settings!
     when button_activate_title
-      activate!
-    when button_refresh_settings_title
-      refresh_settings
+      start!
     when button_help_title
       help!
-    when button_add_notification_title
-      clear_add_notification
-      new_currency_pair
     when button_cancel_title
       respond_with :message, text: I18n.t(:done), reply_markup: main_keyboard
     end
@@ -37,50 +40,14 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
     respond_with :message, text: I18n.t(:more_infomation), reply_markup: markup
   end
 
-  def activate!
-    refresh_all_settings
-
-    text = I18n.t(:register_fail)
-
-    if user&.update(telegram_chat_id: from['id'],
-                    telegram_first_name: from['first_name'] || '',
-                    telegram_last_name: from['last_name'] || '',
-                    telegram_activated: true)
-      text = I18n.t(:register_done)
-
-      markup = main_keyboard
-    else
-      markup = setup_button([[button_activate_title, button_help_title]])
-    end
-
-    respond_with :message, text: text, reply_markup: markup
-  end
-
   def start!
-    activate!
+    activate
   end
 
   private
 
-  def refresh_settings
-    refresh_all_settings
-    respond_with :message, text: I18n.t(:saved), reply_markup: main_keyboard
-  end
-
   def button_activate_title
     "☑️ #{I18n.t(:activate)}"
-  end
-
-  def button_refresh_settings_title
-    "🔄 #{I18n.t(:refresh_settings)}"
-  end
-
-  def button_help_title
-    "ℹ️ #{I18n.t(:help)}"
-  end
-
-  def button_add_notification_title
-    "➕ #{I18n.t(:add_notification)}"
   end
 
   def button_cancel_title
@@ -101,6 +68,7 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
   def clear_user_info
     session.delete(:lang)
     session.delete(:user_id)
+    clear_add_user
     clear_add_notification
     @user = nil
     set_locale
@@ -112,8 +80,32 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
   end
 
   def main_keyboard
-    setup_button([[button_add_notification_title, button_refresh_settings_title],
-                 [button_help_title]])
+    buttons = session[:user_id] \
+      ? [[button_notifications_title, button_exchange_rates_title],
+         [button_settings_title, button_help_title]] \
+      : [[button_activate_title, button_help_title]]
+
+    setup_button(buttons)
+  end
+
+  def button_notifications_title
+    "🔔 #{I18n.t(:notifications)}"
+  end
+
+  def button_exchange_rates_title
+    "💲 #{I18n.t(:exchange_rates)}"
+  end
+
+  def button_settings_title
+    "🛠 #{I18n.t(:settings)}"
+  end
+
+  def button_help_title
+    "ℹ️ #{I18n.t(:help)}"
+  end
+
+  def button_save_title
+    "💾 #{I18n.t(:save)}"
   end
 
   def setup_button(buttons)
@@ -130,16 +122,14 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
 
   def user
     @user ||= User.find_by(telegram_username: from['username'])
+    session[:user_id] = @user&.id
+    @user
   end
 
   def lang
-    if user
-      session[:user_id] ||= user.id
-      session[:lang] ||= user.lang
-    else
-
-      session[:lang] = from['language_code']&.downcase&.include?('ru') ? 'ru' : 'en'
-    end
+    session[:lang] ||= user \
+      ? user.lang \
+      : from['language_code']&.downcase&.include?('ru') ? 'ru' : 'en'
   end
 end
 

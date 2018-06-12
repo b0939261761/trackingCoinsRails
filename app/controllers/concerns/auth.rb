@@ -26,15 +26,24 @@ module Auth
   def root; end
 
   def check_user
-    render json: { check: !user_by_email(email: params[:email]).nil? }
+    where = params[:email] \
+      ? { email: params[:email] } \
+      : { telegram_username: params[:telegram_username] }
+    render json: { check: !user_find(where).nil? }
   end
 
   def sign_in
     data = 200, { }
 
-    if (user = user_by_email(email: params[:email])) &&
+    where = params[:email] \
+      ? { email: params[:email] } \
+      : { telegram_username: params[:telegram_username] }
+
+    field_activated = params[:email] ? :email_activated : :telegram_activated
+
+    if (user = user_find(where)) &&
        user.authenticate(params[:password]) &&
-       user.confirmed
+       user[field_activated]
 
       header_tokens(user: user)
       data = { user: user_for_api(user: user) }
@@ -49,7 +58,7 @@ module Auth
     email = params[:email]
     status, data = 200, { }
 
-    if user_by_email(email: email)
+    if user_find(email: email)
       status = 400, { error: 'FAIL_EMAIL_EXISTS' }
     else
       par = params.permit(:username, :email, :password).merge(lang: current_lang, telegram_activated: false)
@@ -67,7 +76,7 @@ module Auth
     email = params[:email]
     status, data = 200, { }
 
-    if (user = user_by_email(email: email)) && !user.confirmed
+    if (user = user_find(email: email)) && !user.email_activated
       if send_confirmation(user_id: user.id, email: email, lang: current_lang)
         status, data = 400, { error: 'FAIL_SEND' }
       end
@@ -83,8 +92,8 @@ module Auth
     status, data = 200, { }
 
     if token && token['type'] == 'registration'
-      user = user_by_id(id: token['user'])
-      user.update(confirmed: true)
+      user = user_find(id: token['user'])
+      user.update(email_activated: true, email_enabled: true)
 
       header_tokens(user: user)
       data = { user: user_for_api(user: user) }
@@ -99,7 +108,7 @@ module Auth
     email = params[:email]
     status, data = 200, { }
 
-    if (user = user_by_email(email: email))
+    if (user = user_find(email: email))
       if send_recovery(user_id: user.id, email: email, lang: current_lang)
         status, data = 400, { error: 'FAIL_SEND' }
       end
@@ -126,7 +135,7 @@ module Auth
     status, data = 200, { }
 
     if token && token['type'] == 'recovery'
-      user = user_by_id(id: token['user'])
+      user = user_find(id: token['user'])
       user.update(password: params[:password])
 
       header_tokens(user: user)
@@ -143,7 +152,7 @@ module Auth
     status = 200
 
     if (token = decode_token(token_encode)) && token['type'] == 'refresh'
-      user = user_by_id(id: token['user'])
+      user = user_find(id: token['user'])
 
       if user.refresh_token == token_encode
         header_tokens(user: user)
@@ -164,12 +173,8 @@ module Auth
 
   private
 
-  def user_by_email(email:)
-    @user ||= User.find_by(email: email)
-  end
-
-  def user_by_id(id:)
-    @user ||= User.find(id)
+  def user_find(where)
+    @user ||= User.find_by(where)
   end
 
   def header_tokens(user:)

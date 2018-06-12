@@ -1,3 +1,2 @@
-from = {}
+p /^[[:alpha:]]{5,30}$/.match?('Ваваdddffddddddddddddddddddddddddddddddd')
 
-p from['language_code']&.downcase&.include?('ru') ? 'ru' : 'en'

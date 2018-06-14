@@ -60,7 +60,8 @@ module TelegramChangeNotification
         RETURNING id
     SQL
 
-    if notification = JSON.parse(ActiveRecord::Base.connection.execute(sql).to_json, symbolize_names: true)
+    notification = JSON.parse(ActiveRecord::Base.connection.execute(sql).to_json, symbolize_names: true)
+    if notification.any?
       notification_id = notification[0][:id]
       buttons = [button_disable_notification(notification_id: notification_id),
                 button_remove_notification(notification_id: notification_id)]

@@ -10,6 +10,7 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
   include TelegramChangeNotification
 
   use_session!
+  before_action :refresh_bot, if: -> { session[:refresh_bot] }
   before_action :set_locale
 
   def test!(*)
@@ -58,6 +59,15 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
     "▶️ #{I18n.t(:next)}"
   end
 
+  def refresh_bot
+    if session[:refresh_bot]
+      refresh_all_settings
+      session.delete(:refresh_bot)
+
+      respond_with :message, text: I18n.t(:bot_refresh), reply_markup: main_keyboard
+    end
+  end
+
   def refresh_all_settings
     @user = nil
     clear_user_info
@@ -68,6 +78,7 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
   def clear_user_info
     session.delete(:lang)
     session.delete(:user_id)
+
     clear_add_user
     clear_add_notification
     @user = nil
@@ -112,10 +123,6 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
     Telegram::Bot::Types::ReplyKeyboardMarkup.new(keyboard: buttons, resize_keyboard: true, one_time_keyboard: true).to_hash
   end
 
-  def session_key
-    "#{bot.username}:#{chat['id']}:#{from['id']}" if chat && from
-  end
-
   def set_locale
     I18n.locale = lang
   end
@@ -126,10 +133,16 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
     @user
   end
 
+  def session_key
+    if (subject = from || chat) then "#{subject['id']}" end
+  end
+
   def lang
-    session[:lang] ||= user \
-      ? user.lang \
-      : from['language_code']&.downcase&.include?('ru') ? 'ru' : 'en'
+    session[:lang] ||= user&.lang || lang_from_update
+  end
+
+  def lang_from_update
+    from['language_code']&.downcase&.include?('ru') ? 'ru' : 'en'
   end
 end
 

@@ -14,21 +14,13 @@ module TelegramSettings
       session.delete(:new_password)
       change_password
       return
-    when button_refresh_settings_title
-      refresh_settings
-      return
     end
 
-    markup = setup_button([[button_refresh_settings_title, button_change_language_title],
-                           [button_change_password_title, button_cancel_title]])
+    markup = setup_button([[button_change_language_title, button_change_password_title],
+                           [button_cancel_title]])
 
     respond_with :message, text: I18n.t(:selected_settings), reply_markup: markup
     save_context :settings!
-  end
-
-  def refresh_settings
-    refresh_all_settings
-    respond_with :message, text: I18n.t(:done), reply_markup: main_keyboard
   end
 
   def change_language(*args)
@@ -92,10 +84,6 @@ module TelegramSettings
 
   def button_change_password_title
     "🛡 #{I18n.t(:change_password)}"
-  end
-
-  def button_refresh_settings_title
-    "🔄 #{I18n.t(:refresh_settings)}"
   end
 
   def button_change_language_title

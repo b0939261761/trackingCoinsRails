@@ -49,3 +49,4 @@ en:
   selected_username: 'Entered username:'
   ask_enter_password: 'Enter password'
   selected_password: 'Entered password:'
+  bot_refresh: 'Bot refresh'

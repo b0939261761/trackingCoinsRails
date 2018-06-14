@@ -48,3 +48,4 @@ ru:
   selected_username: 'Введенное имя пользователя:'
   ask_enter_password: 'Введите пароль'
   selected_password: 'Введенный пароль:'
+  bot_refresh: 'Бот обновлен'

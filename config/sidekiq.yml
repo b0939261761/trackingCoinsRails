@@ -3,4 +3,5 @@
 :queues:
   - exchanges
   - notifications
+  - farms_monitoring
   - default

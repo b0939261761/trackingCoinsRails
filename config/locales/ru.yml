@@ -48,3 +48,13 @@ ru:
   selected_password: 'Введенный пароль:'
   bot_refresh: 'Бот обновлен'
   support: 'Поддержка'
+  farms_monitoring: 'Мониторинг ферм'
+  create: 'Создать'
+  ask_enter_create_farms_monitoring: 'Введите адресс кошелька'
+  selected_create_farms_monitoring: 'Введенный адресс кошелька'
+  remove: 'Удалить'
+  view: 'Посмотреть'
+  address_account: 'Адресс кошелька:'
+
+
+

@@ -5,6 +5,7 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
   include Telegram::Bot::UpdatesController::MessageContext
   include NotificationsAdditional
   include TelegramNotifications
+  include TelegramFarmsMonitoring
   include TelegramSettings
   include TelegramActivate
   include TelegramChangeNotification
@@ -24,6 +25,8 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
       notifications!
     when button_exchange_rates_title
       exchange_rates!
+    when button_farms_monitoring_title
+      farms_monitoring!
     when button_settings_title
       settings!
     when button_activate_title
@@ -104,6 +107,10 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
     "☑️ #{I18n.t(:activate)}"
   end
 
+  def button_activate_title
+    "☑️ #{I18n.t(:activate)}"
+  end
+
   def button_cancel_title
     "❌ #{I18n.t(:cancel)}"
   end
@@ -146,6 +153,7 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
   def main_keyboard
     buttons = session[:user_id] \
       ? [[button_notifications_title, button_exchange_rates_title],
+         [button_farms_monitoring_title], \
          [button_settings_title, button_help_title]] \
       : [[button_activate_title, button_help_title]]
 
@@ -166,6 +174,10 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
 
   def button_help_title
     "ℹ️ #{I18n.t(:help)}"
+  end
+
+  def button_farms_monitoring_title
+    "🔥 #{I18n.t(:farms_monitoring)}"
   end
 
   def button_save_title

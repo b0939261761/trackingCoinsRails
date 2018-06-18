@@ -2,3 +2,8 @@ exchanges_get_price_job:
   cron: '*/1 * * * *'
   class: 'ExchangesGetPriceJob'
   queue: exchanges
+
+farms_monitoring_job:
+  cron: '*/5 * * * *'
+  class: 'FarmsMonitoringJob'
+  queue: farms_monitoring

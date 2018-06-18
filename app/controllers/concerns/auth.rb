@@ -18,9 +18,10 @@ module Auth
   include Bitsane
   include Okcoin
 
+  include Nanopool
 
   def test
-    render json: { check: true }
+    render json: { check: 'true' }
   end
 
   def root; end

@@ -49,7 +49,7 @@ en:
   selected_password: 'Entered password:'
   bot_refresh: 'Bot refresh'
   support: 'Support'
-  farms_monitoring: 'Farms monitoring'
+  farms_monitoring: 'Worker monitoring'
   create: 'Create'
   ask_enter_create_farms_monitoring: 'Enter address account'
   selected_create_farms_monitoring: 'Entered address account:'

@@ -16,17 +16,17 @@ class ExchangesGetPriceJob < ApplicationJob
   include Okcoin
 
   def perform
-    binance
-    hitbtc
-    livecoin
-    exmo
-    bittrex
-    bitstamp
-    cex
-    bitsane
-    okcoin
-    yobit
+    # binance
+    # hitbtc
+    # livecoin
+    # exmo
+    # bittrex
+    # bitstamp
+    # cex
+    # bitsane
+    # okcoin
+    # yobit
 
-    check_notifications
+    # check_notifications
   end
 end

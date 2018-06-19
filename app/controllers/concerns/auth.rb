@@ -21,7 +21,7 @@ module Auth
   include Nanopool
 
   def test
-    render json: { check: 'true' }
+    render json: { check: nanopool }
   end
 
   def root; end

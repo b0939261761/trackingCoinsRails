@@ -35,6 +35,8 @@ module Nanopool
         hashrate = o[:hashrate].to_f.round(3)
         worker = o[:worker]
         farm = Farm.find_by(user_id: user_id, name: worker)
+        worker = { worker: worker, hashrate: hashrate, diff_percent: 0 }
+
         if hashrate.nonzero?
           if farm
             amount = farm.amount
@@ -44,8 +46,7 @@ module Nanopool
             new_sum_hashrate = sum_hashrate + hashrate
             diff_percent =(100-(new_sum_hashrate / new_amount) / (sum_hashrate / amount)*100).round(1)
 
-            worker = { worker: worker, hashrate: hashrate, diff_percent: diff_percent }
-
+            worker[:diff_percent] = diff_percent
             if amount > 5 && diff_percent >= 7.5
               workers_fail << worker
             end
@@ -66,13 +67,18 @@ module Nanopool
 
   def nanopool_telegram_send(chat_id:, workers:)
     bot = Telegram::Bot::Client.new(ENV['TELEGRAM_BOT_TOKEN'])
-    text = workers.map{ |o| "*#{o[:worker]}*: `#{o[:hashrate]}` #{o[:diff_percent]}%"}.join('\n')
+    text = workers
+      .map{ |o| "*#{o[:worker]}*: `#{o[:hashrate]}` #{o[:diff_percent].nonzero? ? "#{o[:diff_percent]}%" : ''}"}
+      .join('\n')
+
     bot.send_message chat_id: chat_id, text: text, parse_mode: 'Markdown'
   end
 
   def nanopool_telegram_send_fail(chat_id:, workers_fail:)
     bot = Telegram::Bot::Client.new(ENV['TELEGRAM_BOT_TOKEN'])
-    text = workers_fail.map{ |o| "*#{o[:worker]}*: `#{o[:hashrate]}` #{o[:diff_percent]}%"}.join('\n')
+    text = workers_fail
+      .map{ |o| "*#{o[:worker]}*: `#{o[:hashrate]}` #{o[:diff_percent].nonzero? ? "#{o[:diff_percent]}%" : ''}"}
+      .join('\n')
     photo = 'https://i.imgur.com/Dr5Hwyj.png'
     bot.public_send :send_photo, chat_id: chat_id, photo: photo, caption: text, parse_mode: 'Markdown'
   end

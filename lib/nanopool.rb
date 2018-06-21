@@ -79,6 +79,7 @@ module Nanopool
     text = workers_fail
       .map{ |o| "*#{o[:worker]}*: `#{o[:hashrate]}` #{o[:diff_percent].nonzero? ? "#{o[:diff_percent]}%" : ''}"}
       .join('\n')
+      
     photo = 'https://i.imgur.com/Dr5Hwyj.png'
     bot.public_send :send_photo, chat_id: chat_id, photo: photo, caption: text, parse_mode: 'Markdown'
   end

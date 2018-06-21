@@ -32,6 +32,6 @@ deploy:
   skip_cleanup: true
   script: bash -c '
     rsync --recursive ./* $SSH_USER@$SSH_HOST:$DELPOY_PATH/
-    && ssh root@$SSH_HOST "cd $APP_PATH && docker-compose run app bash -c \"bundle install || bundle exec rails db:migrate \" && systemctl restart coins"'
+    && ssh root@$SSH_HOST "cd $APP_PATH && docker-compose run app bash -c \"bundle check || bundle install && bundle exec rails db:migrate \" && systemctl restart coins"'
   on:
     branch: master

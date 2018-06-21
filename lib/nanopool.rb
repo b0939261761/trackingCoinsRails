@@ -55,6 +55,8 @@ module Nanopool
           else
             Farm.create(user_id: user_id, name: worker, sum_hashrate: hashrate, amount: 1)
           end
+        else
+          workers_fail << worker
         end
       end
     end

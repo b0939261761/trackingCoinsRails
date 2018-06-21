@@ -3,7 +3,7 @@ language: node_js
 env:
   SSH_USER: root
   APP_PATH: /root/trackingCoins
-  DELPOY_PATH: $APP_PATH/trackingCoinsRails1
+  DELPOY_PATH: $APP_PATH/trackingCoinsRails
 
 sudo: false
 

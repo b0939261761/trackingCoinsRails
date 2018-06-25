@@ -13,9 +13,6 @@ module Nanopool
 
       users_piece.each do |user|
         workers = nanopool_respond_info(user_id: user[:id], address: user[:nanopool_address])
-        # if workers[:all].any?
-        #   nanopool_telegram_send(chat_id: user[:telegram_chat_id], workers: workers[:all])
-        # end
 
         if workers[:fail].any?
           nanopool_telegram_send_fail(chat_id: user[:telegram_chat_id], workers_fail: workers[:fail])
@@ -27,7 +24,6 @@ module Nanopool
   def nanopool_respond_info(user_id:, address:)
     response = Net::HTTP.get(URI("#{NANOPOOL_URL}#{address}"))
     data = JSON.parse(response, symbolize_names: true)
-    # workers_all = []
     workers_fail = []
 
     if data[:status]
@@ -51,10 +47,10 @@ module Nanopool
               workers_fail << worker
             end
 
-            # workers_all << worker
             farm.update(sum_hashrate: new_sum_hashrate, amount: new_amount)
           else
-            Farm.create(user_id: user_id, name: worker, sum_hashrate: hashrate, amount: 1)
+
+            Farm.create(user_id: user_id, name: worker[:worker], sum_hashrate: hashrate, amount: 1)
           end
         else
           workers_fail << worker
@@ -62,16 +58,7 @@ module Nanopool
       end
     end
 
-    { all: workers_all, fail: workers_fail }
-  end
-
-  def nanopool_telegram_send(chat_id:, workers:)
-    bot = Telegram::Bot::Client.new(ENV['TELEGRAM_BOT_TOKEN'])
-    text = workers
-      .map{ |o| "*#{o[:worker]}*: `#{o[:hashrate]}` #{o[:diff_percent].nonzero? ? "#{o[:diff_percent]}%" : ''}"}
-      .join('\n')
-
-    bot.send_message chat_id: chat_id, text: text, parse_mode: 'Markdown'
+    { fail: workers_fail }
   end
 
   def nanopool_telegram_send_fail(chat_id:, workers_fail:)

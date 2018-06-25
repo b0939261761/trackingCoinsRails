@@ -13,9 +13,9 @@ module Nanopool
 
       users_piece.each do |user|
         workers = nanopool_respond_info(user_id: user[:id], address: user[:nanopool_address])
-        if workers[:all].any?
-          nanopool_telegram_send(chat_id: user[:telegram_chat_id], workers: workers[:all])
-        end
+        # if workers[:all].any?
+        #   nanopool_telegram_send(chat_id: user[:telegram_chat_id], workers: workers[:all])
+        # end
 
         if workers[:fail].any?
           nanopool_telegram_send_fail(chat_id: user[:telegram_chat_id], workers_fail: workers[:fail])
@@ -27,7 +27,7 @@ module Nanopool
   def nanopool_respond_info(user_id:, address:)
     response = Net::HTTP.get(URI("#{NANOPOOL_URL}#{address}"))
     data = JSON.parse(response, symbolize_names: true)
-    workers_all = []
+    # workers_all = []
     workers_fail = []
 
     if data[:status]
@@ -51,7 +51,7 @@ module Nanopool
               workers_fail << worker
             end
 
-            workers_all << worker
+            # workers_all << worker
             farm.update(sum_hashrate: new_sum_hashrate, amount: new_amount)
           else
             Farm.create(user_id: user_id, name: worker, sum_hashrate: hashrate, amount: 1)
@@ -79,7 +79,7 @@ module Nanopool
     text = workers_fail
       .map{ |o| "*#{o[:worker]}*: `#{o[:hashrate]}` #{o[:diff_percent].nonzero? ? "#{o[:diff_percent]}%" : ''}"}
       .join('\n')
-      
+
     photo = 'https://i.imgur.com/Dr5Hwyj.png'
     bot.public_send :send_photo, chat_id: chat_id, photo: photo, caption: text, parse_mode: 'Markdown'
   end

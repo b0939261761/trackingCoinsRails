@@ -13,9 +13,10 @@ module Nanopool
 
       users_piece.each do |user|
         workers = nanopool_respond_info(user_id: user[:id], address: user[:nanopool_address])
+        chat_id = user[:telegram_chat_id]
 
-        if workers[:fail].any?
-          nanopool_telegram_send_fail(chat_id: user[:telegram_chat_id], workers_fail: workers[:fail])
+        workers.each do |k, v|
+          nanopool_telegram_send(type: k, chat_id: chat_id, workers: v) if v.any?
         end
       end
     end
@@ -25,49 +26,75 @@ module Nanopool
     response = Net::HTTP.get(URI("#{NANOPOOL_URL}#{address}"))
     data = JSON.parse(response, symbolize_names: true)
     workers_fail = []
+    workers_success = []
+    workers_above = []
+    workers_less = []
 
     if data[:status]
       data[:data].each do |o|
-        hashrate = o[:hashrate].to_f.round(3)
-        worker = o[:worker]
-        farm = Farm.find_by(user_id: user_id, name: worker)
-        worker = { worker: worker, hashrate: hashrate, diff_percent: 0 }
+        hashrate = o[:hashrate].to_f.round(2)
+        worker_name = o[:worker]
+        farm = Farm.find_by(user_id: user_id, name: worker_name)
+        worker = { worker: worker_name, hashrate: hashrate, diff_percent: 0 }
 
-        if hashrate.nonzero?
-          if farm
-            amount = farm.amount
-            sum_hashrate = farm.sum_hashrate
+        if farm
+          amount = farm.amount
+          new_amount = amount
+          sum_hashrate = farm.sum_hashrate
+          new_sum_hashrate = sum_hashrate
+          activated = farm.activated
 
-            new_amount = amount + 1
-            new_sum_hashrate = sum_hashrate + hashrate
-            diff_percent =(100-(new_sum_hashrate / new_amount) / (sum_hashrate / amount)*100).round(1)
-
+          if hashrate.nonzero?
+            new_amount += 1
+            new_sum_hashrate += hashrate
+            diff_percent =(hashrate / sum_hashrate * amount * 100 - 100).round(1)
             worker[:diff_percent] = diff_percent
-            if amount > 5 && diff_percent >= 7.5
-              workers_fail << worker
+            if amount > 5 && activated
+              workers_less << worker if diff_percent <= -7.5
+              workers_above << worker if diff_percent >= 7.5
+              workers_success << worker if farm.last_hashrate.zero?
             end
-
-            farm.update(sum_hashrate: new_sum_hashrate, amount: new_amount)
           else
-
-            Farm.create(user_id: user_id, name: worker[:worker], sum_hashrate: hashrate, amount: 1)
+            workers_fail << worker if activated
           end
+
+          farm.update(sum_hashrate: new_sum_hashrate, amount: new_amount, last_hashrate: hashrate)
         else
-          workers_fail << worker
+          Farm.create(user_id: user_id, name: worker_name, sum_hashrate: hashrate, amount: 1)
         end
       end
     end
 
-    { fail: workers_fail }
+    { success: workers_success, above: workers_above, less: workers_less, fail: workers_fail }
   end
 
-  def nanopool_telegram_send_fail(chat_id:, workers_fail:)
-    bot = Telegram::Bot::Client.new(ENV['TELEGRAM_BOT_TOKEN'])
-    text = workers_fail
-      .map{ |o| "*#{o[:worker]}*: `#{o[:hashrate]}` #{o[:diff_percent].nonzero? ? "#{o[:diff_percent]}%" : ''}"}
-      .join('\n')
+  def bot
+    @bot ||= Telegram::Bot::Client.new(ENV['TELEGRAM_BOT_TOKEN'])
+  end
 
-    photo = 'https://i.imgur.com/Dr5Hwyj.png'
-    bot.public_send :send_photo, chat_id: chat_id, photo: photo, caption: text, parse_mode: 'Markdown'
+  def telegram_send_photo(chat_id:, photo:, caption:)
+    bot.public_send :send_photo, chat_id: chat_id, photo: photo, caption: caption, parse_mode: 'Markdown'
+  end
+
+  def nanopool_telegram_send(type:, chat_id:, workers:)
+    text = workers.map do|o|
+      case type
+      when :success
+        "Rigs OFFLINE *#{o[:worker]}*\nHashrate: `#{o[:hashrate]} Mh/s`"
+      when :fail
+        "Rigs OFFLINE *#{o[:worker]}*"
+      when :less
+        "*#{o[:worker]}*: `#{o[:hashrate]}` #{o[:diff_percent]}%"
+      when :above
+        "Worker: *#{o[:worker]}*\nHashrate: `#{o[:hashrate]} Mh/s`"
+      else
+        ''
+      end
+    end
+    .join("\n")
+
+    photo_name = { fail: 'Dr5Hwyj', less: 'Dr5Hwyj', above: '0d2vZfk', success: 'KGEsyft' }
+    photo = "https://imgur.com/#{photo_name[type]}.png"
+    telegram_send_photo chat_id: chat_id, photo: photo, caption: text
   end
 end

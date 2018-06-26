@@ -25,7 +25,7 @@ module TelegramActivate
       return
     end
 
-    session[:new_username] = args[0] if /^[[:alpha:]]{5,30}$/.match?(args[0])
+    session[:new_username] = args[0] if /^[[:alnum:]]{5,30}$/.match?(args[0])
 
     markup = setup_button([(session[:new_username] ? [button_next_title] : []) +
                           [button_cancel_title]])

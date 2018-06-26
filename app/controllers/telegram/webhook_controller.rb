@@ -10,6 +10,9 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
   include TelegramActivate
   include TelegramChangeNotification
 
+  require 'net/http'
+
+
   use_session!
   before_action :refresh_bot, if: -> { session[:refresh_bot] }
   before_action :set_locale
@@ -132,7 +135,12 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
     @user = nil
     clear_user_info
     clear_add_notification
+    clear_monitoring_farms
     set_locale
+  end
+
+  def clear_monitoring_farms
+    session.delete(:new_nanopool_address)
   end
 
   def clear_user_info
@@ -140,7 +148,6 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
     session.delete(:user_id)
 
     clear_add_user
-    clear_add_notification
     @user = nil
     set_locale
   end

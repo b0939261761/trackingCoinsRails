@@ -42,9 +42,9 @@ ru:
   english: 'Английский'
   russian: 'Русский'
   change_password: 'Смена пароля'
-  ask_enter_username: 'Введите имя пользователя'
+  ask_enter_username: "Введите имя пользователя:\n`(только буквенно-числовое значение от 5 до 30 символов)`"
   selected_username: 'Введенное имя пользователя:'
-  ask_enter_password: 'Введите пароль'
+  ask_enter_password: "Введите пароль:\n`(от 5 до 31 символа без пробела)`"
   selected_password: 'Введенный пароль:'
   bot_refresh: 'Бот обновлен'
   support: 'Поддержка'
@@ -55,6 +55,9 @@ ru:
   remove: 'Удалить'
   view: 'Посмотреть'
   address_account: 'Адресс кошелька:'
+  remove_account: 'Удалить кошелёк'
+  account_not_farms: 'Текущий кошелек не содержит ферм!'
+
 
 
 

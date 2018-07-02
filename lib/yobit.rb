@@ -4,7 +4,7 @@
 module Yobit
   YOBIT_NAME = 'YObit'
   YOBIT_URL_PAIRS = URI('https://yobit.net/api/3/info')
-  YOBIT_URL_PRICES = 'https://yobit.net/api/3/ticker/'
+  YOBIT_URL_PRICES = 'https://yobit.net/api/3/ticker1111/'
 
   def yobit_pairs
     response_pairs = Net::HTTP.get(YOBIT_URL_PAIRS)
@@ -21,6 +21,7 @@ module Yobit
       .where(exchanges: { name: YOBIT_NAME}).to_json,
        symbolize_names: true)
 
+    p data_pairs
     data_pairs.each_slice(45) do |pairs_info|
       sleep 1
 

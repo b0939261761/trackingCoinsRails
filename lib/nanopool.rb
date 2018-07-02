@@ -33,6 +33,7 @@ module Nanopool
     if data[:status]
       data[:data].each do |o|
         hashrate = o[:hashrate].to_f.round(2)
+
         worker_name = o[:worker]
         farm = Farm.find_by(user_id: user_id, name: worker_name)
         worker = { worker: worker_name, hashrate: hashrate, diff_percent: 0 }
@@ -43,8 +44,10 @@ module Nanopool
           sum_hashrate = farm.sum_hashrate
           new_sum_hashrate = sum_hashrate
           activated = farm.activated
+          counter_zero = farm.counter_zero
 
           if hashrate.nonzero?
+            counter_zero = 0
             new_amount += 1
             new_sum_hashrate += hashrate
             diff_percent =(hashrate / sum_hashrate * amount * 100 - 100).round(1)
@@ -52,13 +55,15 @@ module Nanopool
             if amount > 5 && activated
               workers_less << worker if diff_percent <= -7.5
               workers_above << worker if diff_percent >= 7.5
-              workers_success << worker if farm.last_hashrate.zero?
             end
+
+            workers_success << worker if farm.last_hashrate.zero? && activated
           else
-            workers_fail << worker if activated
+            counter_zero += 1
+            workers_fail << worker if activated && (counter_zero < 6 || ((counter_zero - 5) % 4).zero?)
           end
 
-          farm.update(sum_hashrate: new_sum_hashrate, amount: new_amount, last_hashrate: hashrate)
+          farm.update(sum_hashrate: new_sum_hashrate, amount: new_amount, last_hashrate: hashrate, counter_zero: counter_zero)
         else
           Farm.create(user_id: user_id, name: worker_name, sum_hashrate: hashrate, amount: 1)
         end

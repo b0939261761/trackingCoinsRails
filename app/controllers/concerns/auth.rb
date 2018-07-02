@@ -20,6 +20,8 @@ module Auth
 
   include Nanopool
 
+  # require 'logger'
+
   def test
     render json: { check: nanopool }
   end
@@ -168,8 +170,9 @@ module Auth
   end
 
   def get_currencies
-    render json: coinmarketcap
-    render json: yobit_pairs
+    coinmarketcap
+    yobit_pairs
+    render json: { status: true }
   end
 
   private

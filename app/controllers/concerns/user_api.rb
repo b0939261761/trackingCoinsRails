@@ -18,7 +18,6 @@ module UserApi
     end
 
     user = User.find(user_id)
-    p par
     user.update(par)
     render json: { user: user_for_api(user: user) }
   end

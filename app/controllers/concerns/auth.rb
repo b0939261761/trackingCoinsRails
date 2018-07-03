@@ -20,10 +20,8 @@ module Auth
 
   include Nanopool
 
-  # require 'logger'
-
   def test
-    render json: { check: nanopool }
+    render json: { check: bitstamp }
   end
 
   def root; end

@@ -73,15 +73,8 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
                cc.close_time
         FROM pairs aa
         LEFT JOIN exchanges bb ON bb.id = aa.exchange_id
-        CROSS JOIN LATERAL (
-          SELECT price,
-                 close_time
-          FROM prices
-          WHERE pair_id = aa.id
-          ORDER BY close_time desc
-          LIMIT 1
-        ) cc
-        WHERE aa.symbol = '#{symbol}'
+        LEFT JOIN prices cc ON cc.pair_id = aa.id
+        WHERE aa.symbol = '#{symbol}' AND cc.price IS NOT NULL
         ORDER BY 1
       SQL
 
@@ -217,5 +210,3 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
     from['language_code']&.downcase&.include?('ru') ? 'ru' : 'en'
   end
 end
-
-

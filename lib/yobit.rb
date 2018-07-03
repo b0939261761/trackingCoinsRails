@@ -21,7 +21,6 @@ module Yobit
       .where(exchanges: { name: YOBIT_NAME}).to_json,
        symbolize_names: true)
 
-    p data_pairs
     data_pairs.each_slice(45) do |pairs_info|
       sleep 1
 

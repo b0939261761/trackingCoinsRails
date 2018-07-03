@@ -12,7 +12,12 @@ module Nanopool
       sleep 1
 
       users_piece.each do |user|
-        workers = nanopool_respond_info(user_id: user[:id], address: user[:nanopool_address])
+        begin
+          workers = nanopool_respond_info(user_id: user[:id], address: user[:nanopool_address])
+        rescue Exception => e
+          logger.error("ERROR NANOPOOL USER_ID #{user[:id]}: #{e}")
+        end
+
         chat_id = user[:telegram_chat_id]
 
         workers.each do |k, v|
@@ -90,9 +95,9 @@ module Nanopool
       when :fail
         "Rigs OFFLINE *#{o[:worker]}*"
       when :less
-        "*#{o[:worker]}*: `#{o[:hashrate]}` #{o[:diff_percent]}%"
+        "Worker: *#{o[:worker]}*\nHashrate: `#{o[:hashrate]} Mh/s` #{o[:diff_percent]}%"
       when :above
-        "Worker: *#{o[:worker]}*\nHashrate: `#{o[:hashrate]} Mh/s`"
+        "Worker: *#{o[:worker]}*\nHashrate: `#{o[:hashrate]} Mh/s` #{o[:diff_percent]}%"
       else
         ''
       end

@@ -45,8 +45,10 @@ module AdditionalForExchanges
           )
             VALUES
               #{prices.join(',')}
-            ON CONFLICT ( pair_id, close_time )
-              DO UPDATE SET price = EXCLUDED.price
+            ON CONFLICT ( pair_id )
+              DO UPDATE SET
+                price = EXCLUDED.price,
+                close_time = EXCLUDED.close_time
             RETURNING id, pair_id, price
         )
       -- Сохраняем цену

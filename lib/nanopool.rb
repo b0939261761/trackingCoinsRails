@@ -60,7 +60,8 @@ module Nanopool
             workers_success << worker if farm.last_hashrate.zero? && activated
           else
             counter_zero += 1
-            workers_fail << worker if activated && (counter_zero < 6 || ((counter_zero - 5) % 4).zero?)
+            # Первый 5 раз через 5 минут, потом следующие 5 раз через 60 минут, и стоп
+            workers_fail << worker if activated && counter_zero < 306 && (counter_zero < 6 || ((counter_zero - 5) % 60).zero?)
           end
 
           farm.update(sum_hashrate: new_sum_hashrate, amount: new_amount, last_hashrate: hashrate, counter_zero: counter_zero)
@@ -85,7 +86,7 @@ module Nanopool
     text = workers.map do|o|
       case type
       when :success
-        "Rigs OFFLINE *#{o[:worker]}*\nHashrate: `#{o[:hashrate]} Mh/s`"
+        "Rigs ONLINE *#{o[:worker]}*\nHashrate: `#{o[:hashrate]} Mh/s`"
       when :fail
         "Rigs OFFLINE *#{o[:worker]}*"
       when :less
@@ -98,7 +99,7 @@ module Nanopool
     end
     .join("\n")
 
-    photo_name = { fail: 'Dr5Hwyj', less: 'Dr5Hwyj', above: '0d2vZfk', success: 'KGEsyft' }
+    photo_name = { fail: 'Djy8ahL', less: 'Djy8ahL', above: 'oE2blbW', success: 'EB9A536' }
     photo = "https://imgur.com/#{photo_name[type]}.png"
     telegram_send_photo chat_id: chat_id, photo: photo, caption: text
   end

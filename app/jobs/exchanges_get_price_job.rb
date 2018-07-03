@@ -20,7 +20,7 @@ class ExchangesGetPriceJob < ApplicationJob
                    bittrex bitstamp cex bitsane okcoin)
     exchanges.each do |exchange|
       begin
-        # public_send(exchange)
+        public_send(exchange)
       rescue Exception => e
         logger.error("ERROR GET EXCHANGES #{exchange}: #{e}")
       end

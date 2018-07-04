@@ -66,7 +66,7 @@ module Nanopool
           else
             counter_zero += 1
             # Первый 5 раз через 5 минут, потом следующие 5 раз через 60 минут, и стоп
-            workers_fail << worker if activated && counter_zero < 306 && (counter_zero < 6 || ((counter_zero - 5) % 60).zero?)
+            workers_fail << worker if activated && counter_zero < 26 && (counter_zero < 6 || ((counter_zero - 5) % 4).zero?)
           end
 
           farm.update(sum_hashrate: new_sum_hashrate, amount: new_amount, last_hashrate: hashrate, counter_zero: counter_zero)

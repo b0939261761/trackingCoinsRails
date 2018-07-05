@@ -10,7 +10,7 @@ module TelegramHelp
       button_cancel_click
       return
     when button_contacts_title
-      contacts
+      support
       return
     when button_instructions_title
       instuctions
@@ -35,7 +35,7 @@ module TelegramHelp
     save_context :help!
   end
 
-  def contacts
+  def support
     first_name = "☎️ #{I18n.t(:support)} #{APP_NAME}"
     phone_number = ENV['TELEGRAM_SUPPORT_PHONE']
     button_text = "#{I18n.t(:go_to)} #{APP_NAME}"
@@ -56,6 +56,4 @@ module TelegramHelp
   def button_instructions_title
     "🖨 #{I18n.t(:instructions)}"
   end
-
-
 end

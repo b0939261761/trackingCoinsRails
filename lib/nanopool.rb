@@ -4,21 +4,23 @@ module Nanopool
   NANOPOOL_URL = 'https://api.nanopool.org/v1/eth/reportedhashrates/'
 
   def nanopool
-    users = User.select(:id, :telegram_chat_id, :nanopool_address)
-      .where(telegram_enabled: true, telegram_activated: true)
-      .where.not(nanopool_address: '')
+    accounts = MonitoringAccount
+      .joins(:user)
+      .select(:id, :account, 'users.telegram_chat_id')
+      .where(users: { telegram_enabled: true, telegram_activated: true }, activated: true)
+      .order('users.id')
 
-    users.each_slice(25) do |users_piece|
+    accounts.each_slice(25) do |accounts_piece|
       sleep 1
 
-      users_piece.each do |user|
+      accounts_piece.each do |account|
         begin
-          workers = nanopool_respond_info(user_id: user[:id], address: user[:nanopool_address])
+          workers = nanopool_respond_info(account_id: account[:id], account: account[:account])
         rescue Exception => e
-          logger.error("ERROR NANOPOOL USER_ID #{user[:id]}: #{e}")
+          logger.error("ERROR NANOPOOL monitoring_account_ID #{account[:id]}: #{e}")
         end
 
-        chat_id = user[:telegram_chat_id]
+        chat_id = account[:telegram_chat_id]
 
         workers.each do |k, v|
           nanopool_telegram_send(type: k, chat_id: chat_id, workers: v) if v.any?
@@ -27,8 +29,8 @@ module Nanopool
     end
   end
 
-  def nanopool_respond_info(user_id:, address:)
-    response = Net::HTTP.get(URI("#{NANOPOOL_URL}#{address}"))
+  def nanopool_respond_info(account_id:, account:)
+    response = Net::HTTP.get(URI("#{NANOPOOL_URL}#{account}"))
     data = JSON.parse(response, symbolize_names: true)
     workers_fail = []
     workers_success = []
@@ -38,9 +40,8 @@ module Nanopool
     if data[:status]
       data[:data].each do |o|
         hashrate = o[:hashrate].to_f.round(2)
-
         worker_name = o[:worker]
-        farm = Farm.find_by(user_id: user_id, name: worker_name)
+        farm = Farm.find_by(monitoring_account_id: account_id, name: worker_name)
         worker = { worker: worker_name, hashrate: hashrate, diff_percent: 0 }
 
         if farm
@@ -50,7 +51,6 @@ module Nanopool
           new_sum_hashrate = sum_hashrate
           activated = farm.activated
           counter_zero = farm.counter_zero
-
           if hashrate.nonzero?
             counter_zero = 0
             new_amount += 1
@@ -68,10 +68,9 @@ module Nanopool
             # Первый 5 раз через 5 минут, потом следующие 5 раз через 60 минут, и стоп
             workers_fail << worker if activated && counter_zero < 66 && (counter_zero < 6 || ((counter_zero - 5) % 12).zero?)
           end
-
           farm.update(sum_hashrate: new_sum_hashrate, amount: new_amount, last_hashrate: hashrate, counter_zero: counter_zero)
         else
-          Farm.create(user_id: user_id, name: worker_name, sum_hashrate: hashrate, amount: 1)
+          Farm.create(monitoring_account_id: account_id, name: worker_name, sum_hashrate: hashrate, amount: 1)
         end
       end
     end

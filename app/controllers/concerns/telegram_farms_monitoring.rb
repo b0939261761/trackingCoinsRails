@@ -1,6 +1,11 @@
 # frozen_string_literal: true
 
 module TelegramFarmsMonitoring
+  extend ActiveSupport::Concern
+
+  included do
+    attr_accessor :monitoring_account
+  end
 
   NANOPOOL_URL = 'https://api.nanopool.org/v1/eth/reportedhashrates/'
 
@@ -9,21 +14,18 @@ module TelegramFarmsMonitoring
     when button_cancel_title
       button_cancel_click
       return
-    when button_create_title
+    when button_add_title
       clear_monitoring_farms
       create_farms_monitoring
       return
-    when button_remove_title
-      remove_farms_monitoring
-      return
-    when button_view_title
-      view_farms_monitoring
+    when button_remove_title, button_view_title
+      view_monitoring_accounts
       return
     end
 
-    markup = setup_button( user.nanopool_address.empty? \
-      ? [[button_create_title], [button_cancel_title]] \
-      : [[button_remove_title, button_view_title], [button_cancel_title]])
+    markup = setup_button( user.monitoring_accounts.count.zero? \
+      ? [[button_add_title], [button_cancel_title]] \
+      : [[button_add_title, button_remove_title], [button_view_title, button_cancel_title]])
 
     respond_with :message, text: I18n.t(:farms_monitoring), reply_markup: markup
     save_context :farms_monitoring!
@@ -36,13 +38,13 @@ module TelegramFarmsMonitoring
       button_cancel_click
       return
     when button_save_title
-      account = session.delete(:new_nanopool_address)
+      account = session.delete(:new_account)
       add_monitoring_account(account: account)
       return
     end
 
-    session[:new_nanopool_address] = respond unless respond.empty?
-    account = session[:new_nanopool_address]
+    session[:new_account] = respond unless respond.empty?
+    account = session[:new_account]
     markup = setup_button([[(account ? button_save_title : ''), button_cancel_title]])
 
     text = "#{I18n.t(:ask_enter_create_farms_monitoring)}\n" +
@@ -51,25 +53,42 @@ module TelegramFarmsMonitoring
     save_context :create_farms_monitoring
   end
 
-  def remove_farms_monitoring
-    text = user.update(nanopool_address: '') \
-        ? I18n.t(:done) \
-        : I18n.t(:fail)
+  def view_monitoring_accounts
+    user.monitoring_accounts.each do |o|
+      self.monitoring_account = o
+      view_farms_monitoring
+    end
 
-    respond_with :message, text: text, reply_markup: main_keyboard
+    save_context :farms_monitoring!
   end
 
   def view_farms_monitoring
-    text = "*#{I18n.t(:address_account)}* `#{user.nanopool_address}`\n" +
+    @buttons_view_farms = nil
+    text = "*#{I18n.t(:address_account)}* `#{monitoring_account.account}`\n" +
       (buttons_view_farms.length == 2 ? "*#{I18n.t(:account_not_farms)}*" : '')
     respond_with :message, text: text, reply_markup: setup_inline_button(buttons_view_farms), parse_mode: 'Markdown'
-    save_context :farms_monitoring!
   end
 
   def farm_activated_callback_query(obj, *)
     params = JSON.parse(obj, symbolize_names: true)
-    Farm.where(id: params[:farm_id]).update_all(activated: params[:activated])
-    edit_message :reply_markup, reply_markup: setup_inline_button(buttons_view_farms)
+    farm = Farm.find_by(id: params[:farm_id])
+    if farm&.update(activated: params[:activated])
+      self.monitoring_account = farm.monitoring_account
+      edit_message :reply_markup, reply_markup: setup_inline_button(buttons_view_farms)
+      return
+    end
+    respond_with :message, text: I18n.t(:fail), reply_markup: main_keyboard
+  end
+
+  def account_activated_callback_query(obj, *)
+    params = JSON.parse(obj, symbolize_names: true)
+    self.monitoring_account = MonitoringAccount.find_by(id: params[:monitoring_account_id])
+
+    if monitoring_account&.update(activated: params[:activated])
+      edit_message :reply_markup, reply_markup: setup_inline_button(buttons_view_farms)
+      return
+    end
+    respond_with :message, text: I18n.t(:fail), reply_markup: main_keyboard
   end
 
   def button_cancel_callback_query(*)
@@ -77,53 +96,86 @@ module TelegramFarmsMonitoring
     button_cancel_click
   end
 
-  def remove_farms_callback_query(*)
+  def remove_farms_callback_query(monitoring_account_id, *)
     bot.delete_message chat_id: payload['message']['chat']['id'], message_id: payload['message']['message_id']
-    remove_farms_monitoring
+
+    text = MonitoringAccount.find_by(id: monitoring_account_id)&.destroy \
+        ? I18n.t(:done) \
+        : I18n.t(:fail)
+
+    respond_with :message, text: text, reply_markup: main_keyboard
   end
 
   private
 
   def buttons_view_farms
     @buttons_view_farms ||= Proc.new {
-      farms = Farm.select(:id, :name, :activated).where(user_id: user.id)
+      farms = Farm.select(:id, :name, :activated)
+        .where(monitoring_account_id: monitoring_account.id)
+        .order(:name)
 
-      button_remove = Telegram::Bot::Types::InlineKeyboardButton.new(url: '',
-        text: "🗑 #{I18n.t(:remove_account)}", callback_data: 'remove_farms:')
+      id = monitoring_account.id
+      activated = monitoring_account.activated
 
-      buttons = [button_remove]
+      button_remove = Telegram::Bot::Types::InlineKeyboardButton.new(
+        text: "🗑 #{I18n.t(:remove_account)}", callback_data: "remove_farms:#{id}")
+
+      obj = {monitoring_account_id: id, activated: !activated}.to_json
+
+      button_notification = Telegram::Bot::Types::InlineKeyboardButton.new(
+        text: "#{activated ? "🔕 #{I18n.t(:disable_account)}" : "🔔 #{I18n.t(:enable_account)}"}",
+        callback_data: "account_activated:#{obj}")
+
+      buttons = [[button_notification, button_remove]]
 
       farms.each do |farm|
         buttons << [button_farm(farm_id: farm.id, text:farm.name, activated: farm.activated)]
       end
 
-      buttons << [button_cancel_inline]
+      buttons << button_cancel_inline
     }.call
   end
 
-  def farms_delete
-    Farm.where(user_id: user.id).delete_all
-  end
-
   def add_monitoring_account(account:)
-    if user.update(nanopool_address: account)
-      farms_delete
+    sql = <<-SQL
+      INSERT INTO monitoring_accounts (
+        user_id,
+        account
+      )
+        VALUES (
+          #{user.id},
+          '#{account}'
+          )
+        ON CONFLICT ( user_id, account )
+          DO UPDATE SET
+            activated = true
+        RETURNING id
+    SQL
 
+    monitoring_account_id = JSON.parse(ActiveRecord::Base.connection.execute(sql).to_json,
+      symbolize_names: true)[0][:id]
+
+    if monitoring_account_id
       response = Net::HTTP.get(URI("#{NANOPOOL_URL}#{account}"))
       data = JSON.parse(response, symbolize_names: true)
       if data[:status]
         sql_val = []
-        data[:data].each { |o| sql_val << "(#{user.id}, '#{o[:worker]}')" }
+        data[:data].each { |o| sql_val << "(#{monitoring_account_id}, '#{o[:worker]}')" }
 
         if sql_val.any?
           sql = <<-SQL
-            INSERT INTO farms ( user_id, name )
+            INSERT INTO farms ( monitoring_account_id, name )
               VALUES #{sql_val.join(',')}
+              ON CONFLICT ( monitoring_account_id, name )
+              DO UPDATE SET
+                activated = true
           SQL
 
           ActiveRecord::Base.connection.execute(sql)
         end
       end
+
+      self.monitoring_account = MonitoringAccount.find_by(id: monitoring_account_id)
       view_farms_monitoring
     else
       respond_with :message, text: I18n.t(:fail), reply_markup: main_keyboard
@@ -146,8 +198,8 @@ module TelegramFarmsMonitoring
       callback_data: "farm_activated:#{obj}")
   end
 
-  def button_create_title
-    "➕ #{I18n.t(:create)}"
+  def button_add_title
+    "➕ #{I18n.t(:add)}"
   end
 
   def button_remove_title

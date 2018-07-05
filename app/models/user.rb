@@ -5,6 +5,8 @@ class User < ApplicationRecord
   after_save :refresh_bot, if: :telegram_activated && :saved_change_to_lang?
   after_destroy :refresh_bot, if: :telegram_activated
 
+  has_many :monitoring_accounts
+
   has_secure_password
 
   def bot_session

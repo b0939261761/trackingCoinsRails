@@ -133,7 +133,7 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
   end
 
   def clear_monitoring_farms
-    session.delete(:new_nanopool_address)
+    session.delete(:new_account)
   end
 
   def clear_user_info

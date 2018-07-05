@@ -1,3 +1,3 @@
 class Farm < ApplicationRecord
-  belongs_to :user
+  belongs_to :monitoring_account
 end

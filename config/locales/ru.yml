@@ -50,14 +50,17 @@ ru:
   support: 'Поддержка'
   farms_monitoring: 'Мониторинг ферм'
   create: 'Создать'
+  add: 'Добавить'
   ask_enter_create_farms_monitoring: 'Введите адресс кошелька'
   selected_create_farms_monitoring: 'Введенный адресс кошелька'
   remove: 'Удалить'
   view: 'Посмотреть'
   address_account: 'Адресс кошелька:'
   remove_account: 'Удалить кошелёк'
+  disable_account: 'Отключить кошелёк'
+  enable_account: 'Включить кошелёк'
   account_not_farms: 'Текущий кошелек не содержит ферм!'
-
+  fail: 'Ошибка'
 
 
 

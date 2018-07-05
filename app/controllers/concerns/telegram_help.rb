@@ -50,7 +50,7 @@ module TelegramHelp
   private
 
   def button_contacts_title
-    "☎️ #{I18n.t(:contacts)}"
+    "☎️ #{I18n.t(:support)}"
   end
 
   def button_instructions_title

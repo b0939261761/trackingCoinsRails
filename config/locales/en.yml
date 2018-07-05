@@ -48,7 +48,6 @@ en:
   ask_enter_password: "Enter password:/n(field may a non-whitespace character and not be at least 5 or greater than 31 characters)"
   selected_password: 'Entered password:'
   bot_refresh: 'Bot refresh'
-  support: 'Support'
   farms_monitoring: 'Worker monitoring'
   create: 'Create'
   add: 'Add'

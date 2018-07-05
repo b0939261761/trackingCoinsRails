@@ -47,7 +47,6 @@ ru:
   ask_enter_password: "Введите пароль:\n`(от 5 до 31 символа без пробела)`"
   selected_password: 'Введенный пароль:'
   bot_refresh: 'Бот обновлен'
-  support: 'Поддержка'
   farms_monitoring: 'Мониторинг ферм'
   create: 'Создать'
   add: 'Добавить'

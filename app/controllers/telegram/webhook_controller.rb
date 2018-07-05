@@ -9,6 +9,7 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
   include TelegramSettings
   include TelegramActivate
   include TelegramChangeNotification
+  include TelegramHelp
 
   require 'net/http'
 
@@ -17,7 +18,7 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
   before_action :refresh_bot, if: -> { session[:refresh_bot] }
   before_action :set_locale
 
-  APP_NAME = ENV['APP_NAME']
+  
 
   def test!(*)
   end
@@ -39,17 +40,6 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
     when button_cancel_title
       respond_with :message, text: I18n.t(:done), reply_markup: main_keyboard
     end
-  end
-
-  def help!
-    first_name = "☎️ #{I18n.t(:support)} #{APP_NAME}"
-    phone_number = ENV['TELEGRAM_SUPPORT_PHONE']
-    button_text = "#{I18n.t(:go_to)} #{APP_NAME}"
-    url = ENV['WEB_URL'].gsub('localhost', '127.0.0.1')
-    button = Telegram::Bot::Types::InlineKeyboardButton.new(text: button_text, url: url)
-    markup = Telegram::Bot::Types::InlineKeyboardMarkup.new(inline_keyboard: [[button]]).to_hash
-
-    respond_with :contact, phone_number: phone_number, first_name: first_name, reply_markup: markup
   end
 
   def start!

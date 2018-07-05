@@ -61,6 +61,11 @@ ru:
   enable_account: 'Включить кошелёк'
   account_not_farms: 'Текущий кошелек не содержит ферм!'
   fail: 'Ошибка'
+  contacts: 'Контакты'
+  instructions: 'Инструкции'
+  instruction_registration: 'Инструкция регистрации'
+  user_instruction: 'Инструкция пользователя'
+
 
 
 

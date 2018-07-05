@@ -62,4 +62,9 @@ en:
   enable_account: 'Enable account'
   account_not_farms: 'Current account do not have farms'
   fail: 'Fail'
+  contacts: 'Contacts'
+  instructions: 'Instructions'
+  instruction_registration: 'Instruction about registration'
+  user_instruction: 'User instruction'
+
 

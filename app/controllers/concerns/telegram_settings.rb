@@ -87,7 +87,7 @@ module TelegramSettings
   end
 
   def button_change_language_title
-    "‍🏳️‍🌈 #{I18n.t(:change_language)}"
+    "‍🌍 #{I18n.t(:change_language)}"
   end
 
   def button_english_title

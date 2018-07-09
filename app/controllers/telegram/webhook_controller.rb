@@ -18,7 +18,6 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
   before_action :refresh_bot, if: -> { session[:refresh_bot] }
   before_action :set_locale
 
-  
 
   def test!(*)
   end
@@ -64,7 +63,7 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
         FROM pairs aa
         LEFT JOIN exchanges bb ON bb.id = aa.exchange_id
         LEFT JOIN prices cc ON cc.pair_id = aa.id
-        WHERE aa.symbol = '#{symbol}' AND cc.price IS NOT NULL
+        WHERE aa.symbol = '#{symbol}' AND cc.price IS NOT NULL AND cc.price != 0
         ORDER BY 1
       SQL
 

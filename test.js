@@ -18,11 +18,11 @@ const code = s =>
     [...s].reduce((s,c) => `${s}%uDB40%uDD${c.charCodeAt().toString(16)}`)
   )
 ;
-var a = code('Hello, Habrahabr from Tutu.ru!');
-console.log(a.length)
-console.log(a)
+// var a = code('Hello, Habrahabr from Tutu.ru!');
+// console.log(a.length)
+// console.log(a)
 
-console.log(unescape(escape(a).replace(/u.{8}/g,[])))
+// console.log(unescape(escape(a).replace(/u.{8}/g,[])))
 
 
 
@@ -33,3 +33,16 @@ console.log(unescape(escape(a).replace(/u.{8}/g,[])))
 // ]
 // ;
 
+
+
+var cat = {
+  lives: 9,
+  jumps() {
+    console.log(this )
+    this.lives--;
+  }
+};
+console.log(cat.lives); // => 9
+const jump = cat.jumps;
+jump();
+console.log(cat.lives); // => все еще 9

@@ -26,13 +26,17 @@ module TelegramHelp
 
   def instuctions
     respond_with :video, parse_mode: 'Markdown',
-                 video: File.open('bot_assets/doc.mp4'),
-                 caption: "*#{I18n.t(:instruction_registration)}*"
+                 video: File.open("bot_assets/telegram_registration_#{lang}.mp4"),
+                 caption: "*#{I18n.t(:telegram_registration)}*"
 
-    respond_with :document, parse_mode: 'Markdown',
-                 document: File.open('bot_assets/instruction.pdf'),
-                 caption: "*#{I18n.t(:user_instruction)}*"
-    save_context :help!
+    respond_with :video, parse_mode: 'Markdown',
+                 video: File.open("bot_assets/website_registration_#{lang}.mp4"),
+                 caption: "*#{I18n.t(:website_registration)}*"
+
+    # respond_with :document, parse_mode: 'Markdown',
+    #              document: File.open('bot_assets/instruction.pdf'),
+    #              caption: "*#{I18n.t(:user_instruction)}*"
+    # save_context :help!
   end
 
   def support

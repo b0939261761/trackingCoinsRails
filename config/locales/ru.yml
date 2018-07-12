@@ -62,7 +62,8 @@ ru:
   fail: 'Ошибка'
   support: 'Техподдержка'
   instructions: 'Инструкции'
-  instruction_registration: 'Инструкция регистрации'
+  telegram_registration: 'Регистрация через Telegram'
+  website_registration: 'Регистрация через веб-сайт'
   user_instruction: 'Инструкция пользователя'
 
 

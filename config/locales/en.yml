@@ -63,7 +63,8 @@ en:
   fail: 'Fail'
   support: 'Technical Support'
   instructions: 'Instructions'
-  instruction_registration: 'Instruction about registration'
+  telegram_registration: 'Telegram registration'
+  website_registration: 'Website registration'
   user_instruction: 'User instruction'
 
 

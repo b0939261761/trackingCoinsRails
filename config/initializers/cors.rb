@@ -2,9 +2,10 @@
 
 Rails.application.config.middleware.insert_before 0, Rack::Cors do
   allow do
-    origins(/localhost:\d*/,
+    origins /localhost:\d*/,
             '192.168.5.141',
-            'cryptonot.io')
+            '195.201.121.179',
+            'my.cryptonot.io'
 
     resource '*',
              headers: :any,

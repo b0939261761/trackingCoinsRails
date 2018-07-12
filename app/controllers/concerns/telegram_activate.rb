@@ -6,6 +6,7 @@ module TelegramActivate
     refresh_all_settings
 
     unless user&.update(telegram_fields)
+      instuctionsgi
       new_username
       return
     end

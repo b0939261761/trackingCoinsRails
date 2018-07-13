@@ -91,7 +91,7 @@ module TelegramSettings
   end
 
   def button_english_title
-    "🏴󠁧󠁢󠁥󠁮󠁧󠁿 #{I18n.t(:english)}"
+    "🇺🇸 #{I18n.t(:english)}"
   end
 
   def button_russian_title

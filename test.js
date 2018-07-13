@@ -35,14 +35,24 @@ const code = s =>
 
 
 
-var cat = {
-  lives: 9,
-  jumps() {
-    console.log(this )
-    this.lives--;
-  }
-};
-console.log(cat.lives); // => 9
-const jump = cat.jumps;
-jump();
-console.log(cat.lives); // => все еще 9
+// var cat = {
+//   lives: 9,
+//   jumps() {
+//     console.log(this )
+//     this.lives--;
+//   }
+// };
+// console.log(cat.lives); // => 9
+// const jump = cat.jumps;
+// jump();
+// console.log(cat.lives); // => все еще 9
+
+
+// const arr = Array.prototype.slice.call();
+
+const arr = {lenght: 2, 0: 'zero', 1: 'one'}
+arr.__proto__ = []
+
+
+
+console.log( Array.isArray(arr), arr instanceof Array, arr)

@@ -35,6 +35,7 @@ module TelegramNotifications
         "#{o[:activated] ? '🔔' : '🔕'}\n"
     end
 
+    text = I18n.t(:no_data) if text.empty?
     respond_with :message, text: text, reply_markup: main_keyboard, parse_mode: 'Markdown'
   end
 

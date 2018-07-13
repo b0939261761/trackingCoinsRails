@@ -4,7 +4,6 @@ module NotificationsAdditional
 
   private
 
-
   def notifications(user_id:)
     notifications = Notification
       .joins( :exchange, :pair )

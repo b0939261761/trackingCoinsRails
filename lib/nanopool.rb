@@ -22,7 +22,7 @@ module Nanopool
 
         chat_id = account[:telegram_chat_id]
 
-        workers.each do |k, v|
+        workers&.each do |k, v|
           nanopool_telegram_send(type: k, chat_id: chat_id, workers: v) if v.any?
         end
       end

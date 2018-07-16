@@ -66,7 +66,9 @@ ru:
   website_registration: 'Регистрация через веб-сайт'
   user_instruction: 'Инструкция пользователя'
   no_data: 'Не данных'
-
-
+  current_hashrate: 'Текущий хешрейт'
+  farm: 'Ферма'
+  error_uri: 'Ошибка, кошелек должет содержать только ASCII символы'
+  error_connection: 'Ошибка соединения, попробуйте позже!'
 
 

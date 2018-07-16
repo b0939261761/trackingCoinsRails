@@ -18,6 +18,9 @@ module TelegramFarmsMonitoring
       clear_monitoring_farms
       create_farms_monitoring
       return
+    when button_current_hashrate_title
+      current_hashrate
+      return
     when button_remove_title, button_view_title
       view_monitoring_accounts
       return
@@ -25,9 +28,34 @@ module TelegramFarmsMonitoring
 
     markup = setup_button( user.monitoring_accounts.count.zero? \
       ? [[button_add_title], [button_cancel_title]] \
-      : [[button_add_title, button_remove_title], [button_view_title, button_cancel_title]])
+      : [[button_add_title, button_remove_title],
+         [button_view_title, button_current_hashrate_title],
+         [button_cancel_title]])
 
     respond_with :message, text: I18n.t(:farms_monitoring), reply_markup: markup
+    save_context :farms_monitoring!
+  end
+
+  def current_hashrate
+    text = ''
+    user.monitoring_accounts.each do |account|
+      self.monitoring_account = account
+      text += "\n*#{I18n.t(:address_account)}* `#{monitoring_account.account}`\n"
+
+      if (current_farms = farms).any?
+        current_farms.each do |f|
+          text += <<~TEXT
+          \s   #{I18n.t(:farm)}: *#{f[:name]}*
+          \s   #{I18n.t(:current_hashrate)} `#{f[:last_hashrate]}`
+          \s   ------------
+          TEXT
+        end
+      else
+        text += "*#{I18n.t(:account_not_farms)}*\n"
+      end
+    end
+
+    respond_with :message, text: text, parse_mode: 'Markdown'
     save_context :farms_monitoring!
   end
 
@@ -108,12 +136,12 @@ module TelegramFarmsMonitoring
 
   private
 
+  def farms
+    Farm.where(monitoring_account_id: monitoring_account.id).order(:name)
+  end
+
   def buttons_view_farms
     @buttons_view_farms ||= Proc.new {
-      farms = Farm.select(:id, :name, :activated)
-        .where(monitoring_account_id: monitoring_account.id)
-        .order(:name)
-
       id = monitoring_account.id
       activated = monitoring_account.activated
 
@@ -137,6 +165,23 @@ module TelegramFarmsMonitoring
   end
 
   def add_monitoring_account(account:)
+    begin
+      uri = URI("#{NANOPOOL_URL}#{account}")
+    rescue
+      respond_with :message, text: I18n.t(:error_uri), reply_markup: main_keyboard
+      return
+    end
+
+    begin
+      response = Net::HTTP.get(uri)
+    rescue Exception => e
+      logger.error("ERROR NANOPOOL monitoring_account_ID #{account}: #{e}")
+      respond_with :message, text: I18n.t(:error_connection), reply_markup: main_keyboard
+      return
+    end
+
+    data = JSON.parse(response, symbolize_names: true)
+
     sql = <<-SQL
       INSERT INTO monitoring_accounts (
         user_id,
@@ -156,8 +201,6 @@ module TelegramFarmsMonitoring
       symbolize_names: true)[0][:id]
 
     if monitoring_account_id
-      response = Net::HTTP.get(URI("#{NANOPOOL_URL}#{account}"))
-      data = JSON.parse(response, symbolize_names: true)
       if data[:status]
         sql_val = []
         data[:data].each { |o| sql_val << "(#{monitoring_account_id}, '#{o[:worker]}')" }
@@ -177,9 +220,9 @@ module TelegramFarmsMonitoring
 
       self.monitoring_account = MonitoringAccount.find_by(id: monitoring_account_id)
       view_farms_monitoring
-    else
-      respond_with :message, text: I18n.t(:fail), reply_markup: main_keyboard
+      return
     end
+    respond_with :message, text: I18n.t(:fail), reply_markup: main_keyboard
   end
 
   def button_cancel_inline
@@ -208,5 +251,9 @@ module TelegramFarmsMonitoring
 
   def button_view_title
     "👁‍🗨󠁧󠁢󠁥󠁮󠁧󠁿 #{I18n.t(:view)}"
+  end
+
+  def button_current_hashrate_title
+    "⏲󠁧󠁢󠁥󠁮󠁧󠁿 #{I18n.t(:current_hashrate)}"
   end
 end

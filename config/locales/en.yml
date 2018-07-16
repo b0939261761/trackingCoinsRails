@@ -67,4 +67,10 @@ en:
   website_registration: 'Website registration'
   user_instruction: 'User instruction'
   no_data: 'No data'
+  current_hashrate: 'Current hashrate'
+  farm: 'Farm'
+  error_uri: 'Error, account must be ASCII only'
+  error_connection: 'Connection error, please try again later!'
+
+
 

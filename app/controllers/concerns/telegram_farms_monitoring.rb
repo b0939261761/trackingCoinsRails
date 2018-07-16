@@ -174,13 +174,12 @@ module TelegramFarmsMonitoring
 
     begin
       response = Net::HTTP.get(uri)
+      data = JSON.parse(response, symbolize_names: true)
     rescue Exception => e
       logger.error("ERROR NANOPOOL monitoring_account_ID #{account}: #{e}")
       respond_with :message, text: I18n.t(:error_connection), reply_markup: main_keyboard
       return
     end
-
-    data = JSON.parse(response, symbolize_names: true)
 
     sql = <<-SQL
       INSERT INTO monitoring_accounts (

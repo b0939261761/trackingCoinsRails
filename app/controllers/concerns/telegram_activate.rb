@@ -47,9 +47,11 @@ module TelegramActivate
       button_cancel_click
       return
     when button_save_title
+      username = session[:new_username]
+      telegram_username = from['username']
       telegram_info = telegram_fields.merge(
-        { telegram_username: from['username'],
-          username: session[:new_username],
+        { telegram_username: telegram_username,
+          username: username,
           password: session[:new_password],
           lang: session[:lang],
           telegram_activated: true }
@@ -57,7 +59,9 @@ module TelegramActivate
 
       if (new_user = User.create(telegram_info))
         session[:user_id] = new_user.id
+
         text = I18n.t(:done)
+        notification_new_registration(username: username, telegram_username: telegram_username)
       else
         text = I18n.t(:fail)
       end
@@ -81,6 +85,18 @@ module TelegramActivate
   end
 
   private
+
+  def notification_new_registration(username:,telegram_username:)
+    if (support_chat_id = User.find_by(telegram_username: ENV['TELEGRAM_SUPPORT_USERNAME'])&.telegram_chat_id)
+      text_user_info = <<~TEXT
+        *Новая регистрация*
+        Имя пользователя: `#{username}`
+        Телеграм-аккаунт: `#{telegram_username}`
+      TEXT
+
+      bot.send_message chat_id: support_chat_id, text: text_user_info, parse_mode: 'Markdown'
+    end
+  end
 
   def clear_add_user
     session.delete(:new_password)

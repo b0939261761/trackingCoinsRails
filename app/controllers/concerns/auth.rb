@@ -96,6 +96,8 @@ module Auth
       user = user_find(id: token['user'])
       user.update(email_activated: true, email_enabled: true)
 
+      notification_new_registration(username: user.username, email: user.email)
+
       header_tokens(user: user)
       data = { user: user_for_api(user: user) }
     else
@@ -174,6 +176,18 @@ module Auth
   end
 
   private
+
+  def notification_new_registration(username:,email:)
+    if (support_chat_id = User.find_by(telegram_username: ENV['TELEGRAM_SUPPORT_USERNAME'])&.telegram_chat_id)
+      text_user_info = <<~TEXT
+        *Новая регистрация*
+        Имя пользователя: `#{username}`
+        E-mail: `#{email}`
+      TEXT
+
+      bot.send_message chat_id: support_chat_id, text: text_user_info, parse_mode: 'Markdown'
+    end
+  end
 
   def user_find(where)
     @user ||= User.find_by(where)

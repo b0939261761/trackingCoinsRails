@@ -13,14 +13,9 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
 
   require 'net/http'
 
-
   use_session!
   before_action :refresh_bot, if: -> { session[:refresh_bot] }
   before_action :set_locale
-
-
-  def test!(*)
-  end
 
   def message(data)
     case data['text']
@@ -182,9 +177,26 @@ class Telegram::WebhookController < Telegram::Bot::UpdatesController
   end
 
   def user
-    @user ||= User.find_by(telegram_username: from['username'])
+    @user ||= select_user
+
     session[:user_id] = @user&.id
     @user
+  end
+
+  def select_user
+    chat_id = from['id']
+    username = from['username']
+
+    users = User
+      .where("telegram_chat_id = #{chat_id} OR telegram_username = '#{username}'")
+      .select("*, CASE WHEN telegram_chat_id=#{chat_id} THEN 1 ELSE 2 END AS pr")
+      .order('pr')
+
+    users.second&.update(telegram_username: nil)
+    user = users.first
+    user.update( telegram_username: username ) if @user && @user.telegram_username != username
+
+    user
   end
 
   def session_key

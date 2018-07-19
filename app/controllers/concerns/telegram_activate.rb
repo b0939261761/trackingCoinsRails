@@ -48,9 +48,8 @@ module TelegramActivate
       return
     when button_save_title
       username = session[:new_username]
-      telegram_username = from['username']
       telegram_info = telegram_fields.merge(
-        { telegram_username: telegram_username,
+        { telegram_chat_id: from['id'],
           username: username,
           password: session[:new_password],
           lang: session[:lang],
@@ -61,7 +60,7 @@ module TelegramActivate
         session[:user_id] = new_user.id
 
         text = I18n.t(:done)
-        notification_new_registration(username: username, telegram_username: telegram_username)
+        notification_new_registration(username: username, telegram_username: from['username'])
       else
         text = I18n.t(:fail)
       end
@@ -106,6 +105,7 @@ module TelegramActivate
   def telegram_fields
     {
       telegram_chat_id: from['id'],
+      telegram_username: from['username'],
       telegram_first_name: from['first_name'] || '',
       telegram_last_name: from['last_name'] || '',
       telegram_enabled: true,

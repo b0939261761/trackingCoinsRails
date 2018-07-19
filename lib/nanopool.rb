@@ -7,7 +7,8 @@ module Nanopool
     accounts = MonitoringAccount
       .joins(:user)
       .select(:id, :account, 'users.telegram_chat_id')
-      .where(users: { telegram_enabled: true, telegram_activated: true }, activated: true)
+      .where(users: { telegram_enabled: true, telegram_activated: true },
+             activated: true)
       .order('users.id')
 
     accounts.each_slice(25) do |accounts_piece|
@@ -54,12 +55,16 @@ module Nanopool
           if hashrate.nonzero?
             counter_zero = 0
             new_amount += 1
-            new_sum_hashrate += hashrate
-            diff_percent =(hashrate / sum_hashrate * amount * 100 - 100).round(1)
-            worker[:diff_percent] = diff_percent
-            if amount > 5 && activated
-              workers_less << worker if diff_percent <= -7.5
-              workers_above << worker if diff_percent >= 7.5
+            if new_amount > 10
+              diff_percent =(hashrate / sum_hashrate * 1000 - 100).round(2)
+              worker[:diff_percent] = diff_percent
+
+              if activated
+                workers_less << worker if diff_percent <= -7.5
+                workers_above << worker if diff_percent >= 7.5
+              end
+            else
+              new_sum_hashrate += hashrate
             end
 
             workers_success << worker if farm.last_hashrate.zero? && activated
